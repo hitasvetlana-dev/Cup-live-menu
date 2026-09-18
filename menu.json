@@ -1,0 +1,77 @@
+{
+  "yurga": {
+    "name": "Юрга",
+    "items": [
+      {
+        "name": "Чешское светлое",
+        "price": 129,
+        "show": true
+      },
+      {
+        "name": "Жигулёвское",
+        "price": 119,
+        "show": true
+      },
+      {
+        "name": "Хеллес",
+        "price": 159,
+        "show": true
+      },
+      {
+        "name": "Пшеничное",
+        "price": 149,
+        "show": true
+      },
+      {
+        "name": "Крафт светлое",
+        "price": 179,
+        "show": true
+      },
+      {
+        "name": "IPA",
+        "price": 189,
+        "show": true
+      },
+      {
+        "name": "APA",
+        "price": 179,
+        "show": true
+      },
+      {
+        "name": "Тёмное",
+        "price": 149,
+        "show": true
+      },
+      {
+        "name": "Стаут",
+        "price": 169,
+        "show": true
+      },
+      {
+        "name": "Вишнёвое",
+        "price": 169,
+        "show": true
+      }
+    ]
+  },
+  "yashkino": {
+    "name": "Яшкино",
+    "items": []
+  },
+  "leninsk": {
+    "name": "Ленинск-Кузнецкий",
+    "items": []
+  },
+  "taiga": {
+    "name": "Тайга",
+    "items": []
+  },
+  "topki": {
+    "name": "Топки",
+    "items": []
+  },
+  "kemerovo": {
+    "name": "Кемерово",
+    "items": []
+  }
+}
