@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ЦУП — Пиво на кранах</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0b0b0b;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+.screen {
+  width: 100vw;
+  height: 100vh;
+  padding: 4vh 5vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 4px solid #ffc629;
+  padding-bottom: 2vh;
+  margin-bottom: 3vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.crown {
+  color: #ffc629;
+  font-size: 5vw;
+  line-height: 1;
+}
+
+.logo {
+  font-size: 5vw;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.title {
+  color: #ffc629;
+  font-size: 2.5vw;
+  font-weight: 900;
+}
+
+.menu {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 6vw;
+  grid-auto-rows: 1fr;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #333;
+  gap: 20px;
+}
+
+.name {
+  font-size: 2.7vw;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price {
+  color: #ffc629;
+  font-size: 3.3vw;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.footer {
+  margin-top: 2vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #999;
+  font-size: 1.2vw;
+}
+
+.slogan {
+  color: white;
+  font-weight: 700;
+}
+
+.error {
+  color: #ffc629;
+  font-size: 2vw;
+}
+</style>
+</head>
+
+<body>
+
+<div class="screen">
+
+  <div class="header">
+    <div class="brand">
+      <div class="crown">♛</div>
+      <div class="logo">ЦУП</div>
+    </div>
+
+    <div class="title" id="title">
+      ПИВО НА КРАНАХ
+    </div>
+  </div>
+
+  <div class="menu" id="menu"></div>
+
+  <div class="footer">
+    <div class="slogan">ЦУП — БАР ДЛЯ СВОИХ</div>
+    <div>цена за 1 литр</div>
+  </div>
+
+</div>
+
+<script>
+
+async function loadMenu() {
+
+  try {
+
+    const response = await fetch('/menu.json?time=' + Date.now());
+
+    if (!response.ok) {
+      throw new Error('menu.json не найден');
+    }
+
+    const data = await response.json();
+
+    document.getElementById('title').textContent =
+      data.title || 'ПИВО НА КРАНАХ';
+
+    const menu = document.getElementById('menu');
+
+    menu.innerHTML = '';
+
+    const items = data.items.filter(item => item.show !== false);
+
+    items.forEach(item => {
+
+      const row = document.createElement('div');
+
+      row.className = 'item';
+
+      row.innerHTML = `
+        <div class="name">${item.name}</div>
+        <div class="price">${item.price} ₽</div>
+      `;
+
+      menu.appendChild(row);
+
+    });
+
+  } catch (error) {
+
+    document.getElementById('menu').innerHTML =
+      '<div class="error">Загрузка меню...</div>';
+
+  }
+
+}
+
+loadMenu();
+
+setInterval(loadMenu, 30000);
+
+</script>
+
+</body>
+</html>
