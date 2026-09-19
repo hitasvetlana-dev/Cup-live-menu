@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ЦУП — управление меню</title>
 
 <style>
@@ -14,79 +14,98 @@ body{
   font-family:Arial,Helvetica,sans-serif;
 }
 .wrap{
-  max-width:800px;
+  max-width:900px;
   margin:auto;
   padding:24px 16px 60px;
 }
-h1{
-  margin:0;
-  font-size:32px;
+.logo{
+  font-size:42px;
+  font-weight:900;
 }
-.yellow{color:#ffc629}
-.sub{
+.logo span{color:#ffc629}
+h1{
+  font-size:22px;
   color:#aaa;
-  margin:8px 0 25px;
+  font-weight:400;
+  margin:8px 0 28px;
 }
 .password{
   width:100%;
-  padding:15px;
-  border-radius:10px;
-  border:1px solid #444;
-  background:#181818;
+  background:#171717;
+  border:2px solid #444;
   color:white;
-  font-size:18px;
-  margin-bottom:20px;
+  border-radius:14px;
+  padding:18px;
+  font-size:20px;
+  margin-bottom:25px;
 }
-.item{
+.head,.row{
   display:grid;
-  grid-template-columns:1fr 110px 60px;
+  grid-template-columns:2fr .7fr 1.2fr .65fr;
   gap:10px;
-  margin-bottom:12px;
-}
-.item input[type="text"],
-.item input[type="number"]{
-  width:100%;
-  padding:14px;
-  background:#181818;
-  border:1px solid #444;
-  border-radius:8px;
-  color:#fff;
-  font-size:17px;
-}
-.check{
-  display:flex;
   align-items:center;
-  justify-content:center;
-  background:#181818;
-  border-radius:8px;
 }
-.check input{
-  width:24px;
-  height:24px;
+.head{
+  color:#999;
+  font-size:14px;
+  padding:0 4px 8px;
+}
+.row{margin-bottom:12px}
+input,select{
+  width:100%;
+  background:#171717;
+  border:2px solid #3b3b3b;
+  color:#fff;
+  border-radius:12px;
+  padding:14px;
+  font-size:18px;
+}
+select{
+  padding:14px 8px;
+}
+.newbox{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#171717;
+  border-radius:12px;
+  height:54px;
+}
+.newbox input{
+  width:26px;
+  height:26px;
+  accent-color:#ffc629;
 }
 button{
   width:100%;
-  padding:17px;
-  margin-top:18px;
-  background:#ffc629;
-  color:#111;
   border:0;
-  border-radius:10px;
-  font-size:19px;
-  font-weight:bold;
+  border-radius:14px;
+  background:#ffc629;
+  color:#0b0b0b;
+  padding:18px;
+  font-size:21px;
+  font-weight:900;
+  margin-top:18px;
 }
-#status{
+.msg{
   text-align:center;
   margin-top:15px;
-  font-weight:bold;
+  min-height:24px;
+  font-size:16px;
 }
-.labels{
-  display:grid;
-  grid-template-columns:1fr 110px 60px;
-  gap:10px;
-  color:#aaa;
+.legend{
+  color:#999;
   font-size:13px;
-  margin-bottom:7px;
+  margin-top:20px;
+  line-height:1.6;
+}
+@media(max-width:600px){
+  .head,.row{
+    grid-template-columns:1.7fr .65fr 1.15fr .55fr;
+    gap:6px;
+  }
+  input,select{font-size:16px;padding:12px 8px}
+  .logo{font-size:36px}
 }
 </style>
 </head>
@@ -94,8 +113,8 @@ button{
 <body>
 <div class="wrap">
 
-<h1><span class="yellow">♛</span> ЦУП</h1>
-<div class="sub">Управление экраном «Пиво на кранах»</div>
+<div class="logo"><span>♛</span> ЦУП</div>
+<h1>Управление экраном «Пиво на кранах»</h1>
 
 <input
   id="password"
@@ -104,121 +123,127 @@ button{
   placeholder="Пароль администратора"
 >
 
-<div class="labels">
+<div class="head">
   <div>Название</div>
   <div>Цена ₽</div>
-  <div>Показ</div>
+  <div>Статус</div>
+  <div>NEW</div>
 </div>
 
-<div id="items">Загрузка меню...</div>
+<div id="rows">Загрузка меню...</div>
 
 <button onclick="saveMenu()">СОХРАНИТЬ МЕНЮ</button>
 
-<div id="status"></div>
+<div id="msg" class="msg"></div>
+
+<div class="legend">
+В наличии — показывается в основном меню.<br>
+В пути — показывается отдельно как «СКОРО НА КРАНАХ».<br>
+Скрыть — полностью убирается с экрана.<br>
+NEW — возле позиции появится отметка «НОВИНКА».
+</div>
 
 </div>
 
 <script>
-let menuData = null;
+let items=[];
 
 async function loadMenu(){
-  const status=document.getElementById('status');
-
   try{
-    const response=await fetch('/api/menu?time='+Date.now());
+    const r=await fetch('/api/menu?ts='+Date.now());
+    const data=await r.json();
 
-    if(!response.ok){
-      throw new Error('Не удалось загрузить меню');
-    }
+    items=(data.items||[]).map(x=>({
+      name:x.name||'',
+      price:Number(x.price)||0,
+      status:x.status || (x.show===false?'hidden':'available'),
+      isNew:Boolean(x.isNew)
+    }));
 
-    menuData=await response.json();
-
-    const box=document.getElementById('items');
-    box.innerHTML='';
-
-    menuData.items.forEach((item,index)=>{
-      const row=document.createElement('div');
-      row.className='item';
-
-      row.innerHTML=`
-        <input
-          type="text"
-          value="${escapeHtml(item.name || '')}"
-          oninput="menuData.items[${index}].name=this.value"
-        >
-
-        <input
-          type="number"
-          value="${Number(item.price) || 0}"
-          oninput="menuData.items[${index}].price=Number(this.value)"
-        >
-
-        <label class="check">
-          <input
-            type="checkbox"
-            ${item.show !== false ? 'checked' : ''}
-            onchange="menuData.items[${index}].show=this.checked"
-          >
-        </label>
-      `;
-
-      box.appendChild(row);
-    });
-
-  }catch(error){
-    document.getElementById('items').innerHTML='Ошибка загрузки';
-    status.textContent=error.message;
+    render();
+  }catch(e){
+    document.getElementById('rows').innerHTML='Ошибка загрузки меню';
   }
 }
 
+function render(){
+  const box=document.getElementById('rows');
+  box.innerHTML='';
+
+  items.forEach((x,i)=>{
+    const row=document.createElement('div');
+    row.className='row';
+
+    row.innerHTML=`
+      <input class="name" value="${esc(x.name)}">
+      <input class="price" type="number" min="0" value="${x.price}">
+      <select class="status">
+        <option value="available" ${x.status==='available'?'selected':''}>В наличии</option>
+        <option value="coming" ${x.status==='coming'?'selected':''}>В пути</option>
+        <option value="hidden" ${x.status==='hidden'?'selected':''}>Скрыть</option>
+      </select>
+      <label class="newbox">
+        <input class="new" type="checkbox" ${x.isNew?'checked':''}>
+      </label>
+    `;
+
+    box.appendChild(row);
+  });
+}
+
+function esc(s){
+  return String(s)
+    .replaceAll('&','&amp;')
+    .replaceAll('"','&quot;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;');
+}
+
 async function saveMenu(){
-  const password=document.getElementById('password').value;
-  const status=document.getElementById('status');
+  const password=document.getElementById('password').value.trim();
+  const rows=[...document.querySelectorAll('.row')];
 
   if(!password){
-    status.textContent='Введите пароль администратора';
+    showMsg('Введите пароль администратора',false);
     return;
   }
 
-  status.textContent='Сохраняю...';
+  const updated=rows.map(row=>({
+    name:row.querySelector('.name').value.trim(),
+    price:Number(row.querySelector('.price').value)||0,
+    status:row.querySelector('.status').value,
+    isNew:row.querySelector('.new').checked
+  }));
 
   try{
-    const response=await fetch('/api/menu/default',{
+    const r=await fetch('/api/menu',{
       method:'PUT',
       headers:{
         'Content-Type':'application/json',
         'x-admin-password':password
       },
-      body:JSON.stringify({
-        items:menuData.items
-      })
+      body:JSON.stringify({items:updated})
     });
 
-    if(response.status===401){
-      throw new Error('Неверный пароль');
-    }
-
-    if(!response.ok){
+    if(!r.ok){
+      if(r.status===401) throw new Error('Неверный пароль');
       throw new Error('Ошибка сохранения');
     }
 
-    status.textContent='✓ Меню сохранено';
-
-  }catch(error){
-    status.textContent=error.message;
+    items=updated;
+    showMsg('✓ Меню сохранено',true);
+  }catch(e){
+    showMsg(e.message,false);
   }
 }
 
-function escapeHtml(text){
-  return String(text)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+function showMsg(text,ok){
+  const m=document.getElementById('msg');
+  m.textContent=text;
+  m.style.color=ok?'#ffc629':'#ff6666';
 }
 
 loadMenu();
 </script>
-
 </body>
 </html>
