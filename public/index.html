@@ -142,7 +142,7 @@ async function loadMenu() {
 
   try {
 
-    const response = await fetch('/menu.json?time=' + Date.now());
+    const response = await fetch('/api/menu?time=' + Date.now());
 
     if (!response.ok) {
       throw new Error('menu.json не найден');
