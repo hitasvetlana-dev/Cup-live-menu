@@ -2,112 +2,259 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ЦУП — Пиво на кранах</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#080808;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  overflow:hidden;
 }
 
-body {
-  margin: 0;
-  background: #0b0b0b;
-  color: white;
-  font-family: Arial, Helvetica, sans-serif;
-  overflow: hidden;
+.screen{
+  width:100vw;
+  height:100vh;
+  padding:3.5vh 4vw;
+  display:grid;
+  grid-template-columns:28% 1fr;
+  gap:3vw;
 }
 
-.screen {
-  width: 100vw;
-  height: 100vh;
-  padding: 4vh 5vw;
-  display: flex;
-  flex-direction: column;
+/* КОСМОНАВТ */
+.hero{
+  position:relative;
+  height:100%;
+  overflow:hidden;
+  border-right:1px solid #332b15;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 4px solid #ffc629;
-  padding-bottom: 2vh;
-  margin-bottom: 3vh;
+.space{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(255,198,41,.08),transparent 28%),
+    radial-gradient(circle at 80% 65%,rgba(255,255,255,.04),transparent 25%);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.astronaut{
+  position:absolute;
+  left:2%;
+  bottom:1%;
+  width:96%;
+  height:88%;
 }
 
-.crown {
-  color: #ffc629;
-  font-size: 5vw;
-  line-height: 1;
+.helmet{
+  position:absolute;
+  width:58%;
+  aspect-ratio:1/1;
+  left:18%;
+  top:2%;
+  border:clamp(5px,.6vw,11px) solid #ddd;
+  border-radius:50%;
+  background:#151515;
+  box-shadow:0 0 0 clamp(5px,.8vw,14px) #555;
 }
 
-.logo {
-  font-size: 5vw;
-  font-weight: 900;
-  letter-spacing: 2px;
+.visor{
+  position:absolute;
+  inset:15%;
+  border-radius:48%;
+  background:
+    radial-gradient(circle at 35% 25%,#443a19 0,transparent 25%),
+    linear-gradient(145deg,#080808,#17130a);
+  border:3px solid #333;
 }
 
-.title {
-  color: #ffc629;
-  font-size: 2.5vw;
-  font-weight: 900;
+.visor::after{
+  content:"ЦУП";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  font-size:clamp(22px,3vw,64px);
+  font-weight:900;
+  color:#ffc629;
+  opacity:.7;
 }
 
-.menu {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 6vw;
-  grid-auto-rows: 1fr;
+.body{
+  position:absolute;
+  left:17%;
+  top:45%;
+  width:62%;
+  height:48%;
+  background:linear-gradient(90deg,#bdbdbd,#f4f4f4,#a7a7a7);
+  border-radius:42% 42% 18% 18%;
+  border:4px solid #666;
 }
 
-.item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #333;
-  gap: 20px;
+.patch{
+  position:absolute;
+  top:18%;
+  left:32%;
+  background:#0b0b0b;
+  color:#ffc629;
+  font-weight:900;
+  font-size:clamp(16px,1.6vw,34px);
+  padding:.35em .55em;
 }
 
-.name {
-  font-size: 2.7vw;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.arm{
+  position:absolute;
+  width:25%;
+  height:42%;
+  right:3%;
+  top:52%;
+  background:#d5d5d5;
+  border:4px solid #666;
+  border-radius:50px;
+  transform:rotate(-28deg);
 }
 
-.price {
-  color: #ffc629;
-  font-size: 3.3vw;
-  font-weight: 900;
-  white-space: nowrap;
+.beer{
+  position:absolute;
+  right:1%;
+  bottom:13%;
+  width:25%;
+  height:29%;
+  border:clamp(4px,.4vw,8px) solid #eee;
+  border-radius:5px 5px 18px 18px;
+  background:linear-gradient(to top,#d99600 0 72%,#f7e2a3 72% 84%,#fff 84%);
+  box-shadow:0 0 30px rgba(255,198,41,.15);
 }
 
-.footer {
-  margin-top: 2vh;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #999;
-  font-size: 1.2vw;
+.beer::after{
+  content:"ЦУП";
+  position:absolute;
+  top:43%;
+  width:100%;
+  text-align:center;
+  color:#111;
+  font-weight:900;
+  font-size:clamp(12px,1.2vw,25px);
 }
 
-.slogan {
-  color: white;
-  font-weight: 700;
+/* ПРАВАЯ ЧАСТЬ */
+.content{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
 }
 
-.error {
-  color: #ffc629;
-  font-size: 2vw;
+.header{
+  height:20%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:clamp(3px,.35vw,7px) solid #ffc629;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:1.1vw;
+}
+
+.crown{
+  color:#ffc629;
+  font-size:clamp(30px,3vw,70px);
+  line-height:1;
+}
+
+.logo{
+  font-size:clamp(50px,5.2vw,110px);
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.heading{
+  color:#ffc629;
+  text-align:right;
+  font-size:clamp(24px,2.3vw,50px);
+  font-weight:900;
+}
+
+.sub{
+  display:block;
+  color:#aaa;
+  font-size:.43em;
+  letter-spacing:.25em;
+  margin-top:.45em;
+}
+
+/* МЕНЮ */
+.menu{
+  flex:1;
+  padding-top:3vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  column-gap:4vw;
+  align-content:start;
+}
+
+.item{
+  min-height:9.3vh;
+  display:flex;
+  align-items:center;
+  gap:1vw;
+  border-bottom:1px solid #333;
+  position:relative;
+}
+
+.name{
+  flex:1;
+  min-width:0;
+  font-size:clamp(25px,2.15vw,48px);
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.price{
+  color:#ffc629;
+  font-size:clamp(28px,2.45vw,54px);
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.badge{
+  display:inline-block;
+  margin-left:.5vw;
+  padding:.28em .55em;
+  border-radius:6px;
+  background:#ffc629;
+  color:#090909;
+  font-size:.43em;
+  font-weight:900;
+  vertical-align:middle;
+}
+
+.soonTitle{
+  grid-column:1/-1;
+  color:#ffc629;
+  font-size:clamp(18px,1.45vw,32px);
+  font-weight:900;
+  letter-spacing:.12em;
+  margin:2vh 0 .4vh;
+}
+
+.soon{
+  opacity:.58;
+}
+
+.empty{
+  color:#777;
+  font-size:2vw;
 }
 </style>
 </head>
@@ -116,77 +263,129 @@ body {
 
 <div class="screen">
 
-  <div class="header">
-    <div class="brand">
-      <div class="crown">♛</div>
-      <div class="logo">ЦУП</div>
+  <section class="hero">
+    <div class="space"></div>
+
+    <div class="astronaut">
+      <div class="helmet">
+        <div class="visor"></div>
+      </div>
+
+      <div class="body">
+        <div class="patch">ЦУП</div>
+      </div>
+
+      <div class="arm"></div>
+      <div class="beer"></div>
+    </div>
+  </section>
+
+  <main class="content">
+
+    <header class="header">
+      <div class="brand">
+        <div class="crown">♛</div>
+        <div class="logo">ЦУП</div>
+      </div>
+
+      <div class="heading">
+        ПИВО НА КРАНАХ
+        <span class="sub">БАР ДЛЯ СВОИХ</span>
+      </div>
+    </header>
+
+    <div class="menu" id="menu">
+      <div class="empty">Загрузка меню…</div>
     </div>
 
-    <div class="title" id="title">
-      ПИВО НА КРАНАХ
-    </div>
-  </div>
-
-  <div class="menu" id="menu"></div>
-
-  <div class="footer">
-    <div class="slogan">ЦУП — БАР ДЛЯ СВОИХ</div>
-    <div>цена за 1 литр</div>
-  </div>
-
+  </main>
 </div>
 
 <script>
-
-async function loadMenu() {
-
-  try {
-
-    const response = await fetch('/api/menu?time=' + Date.now());
-
-    if (!response.ok) {
-      throw new Error('menu.json не найден');
-    }
-
-    const data = await response.json();
-
-    document.getElementById('title').textContent =
-      data.title || 'ПИВО НА КРАНАХ';
-
-    const menu = document.getElementById('menu');
-
-    menu.innerHTML = '';
-
-    const items = data.items.filter(item => item.show !== false);
-
-    items.forEach(item => {
-
-      const row = document.createElement('div');
-
-      row.className = 'item';
-
-      row.innerHTML = `
-        <div class="name">${item.name}</div>
-        <div class="price">${item.price} ₽</div>
-      `;
-
-      menu.appendChild(row);
-
+async function loadMenu(){
+  try{
+    const r=await fetch('/api/menu?t='+Date.now(),{
+      cache:'no-store'
     });
 
-  } catch (error) {
+    if(!r.ok) throw new Error();
 
-    document.getElementById('menu').innerHTML =
-      '<div class="error">Загрузка меню...</div>';
+    const data=await r.json();
 
+    const items=Array.isArray(data)
+      ? data
+      : (data.items || data.menu || []);
+
+    const available=items.filter(x =>
+      x.status !== 'hidden' &&
+      x.status !== 'скрыть' &&
+      x.status !== 'hide' &&
+      x.status !== 'soon' &&
+      x.status !== 'В пути' &&
+      x.status !== 'в пути'
+    );
+
+    const soon=items.filter(x =>
+      x.status === 'soon' ||
+      x.status === 'В пути' ||
+      x.status === 'в пути'
+    );
+
+    const box=document.getElementById('menu');
+    box.innerHTML='';
+
+    function addItem(x,soonClass=false){
+      const row=document.createElement('div');
+      row.className='item'+(soonClass?' soon':'');
+
+      const name=document.createElement('div');
+      name.className='name';
+      name.textContent=x.name || x.title || '';
+
+      const isNew=
+        x.new === true ||
+        x.isNew === true ||
+        x.NEW === true;
+
+      if(isNew){
+        const badge=document.createElement('span');
+        badge.className='badge';
+        badge.textContent='НОВИНКА';
+        name.appendChild(badge);
+      }
+
+      const price=document.createElement('div');
+      price.className='price';
+      price.textContent=(x.price ?? '')+' ₽';
+
+      row.appendChild(name);
+      row.appendChild(price);
+      box.appendChild(row);
+    }
+
+    available.forEach(x=>addItem(x));
+
+    if(soon.length){
+      const title=document.createElement('div');
+      title.className='soonTitle';
+      title.textContent='СКОРО НА КРАНАХ';
+      box.appendChild(title);
+
+      soon.forEach(x=>addItem(x,true));
+    }
+
+    if(!available.length && !soon.length){
+      box.innerHTML='<div class="empty">Меню обновляется</div>';
+    }
+
+  }catch(e){
+    document.getElementById('menu').innerHTML=
+      '<div class="empty">Обновление меню…</div>';
   }
-
 }
 
 loadMenu();
-
-setInterval(loadMenu, 30000);
-
+setInterval(loadMenu,15000);
 </script>
 
 </body>
