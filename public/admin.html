@@ -3,109 +3,218 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ЦУП — Управление меню</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   background:#050505;
   color:#fff;
-  font-family:Arial,sans-serif;
+  font-family:Arial,Helvetica,sans-serif;
 }
+
 .wrap{
-  max-width:1000px;
+  max-width:1100px;
   margin:auto;
-  padding:28px 22px 60px;
+  padding:28px 20px 70px;
 }
+
 .logo{
   color:#ffc629;
-  font-size:48px;
+  font-size:54px;
   font-weight:900;
+  margin-bottom:5px;
 }
+
 h1{
-  margin:8px 0 24px;
-  color:#bbb;
-  font-size:34px;
+  margin:0 0 25px;
+  font-size:30px;
 }
+
 .password{
   width:100%;
   padding:18px;
-  margin-bottom:26px;
-  background:#191919;
+  font-size:20px;
   color:#fff;
+  background:#181818;
   border:3px solid #444;
-  border-radius:16px;
-  font-size:22px;
+  border-radius:15px;
+  margin-bottom:25px;
 }
-.head,.row{
+
+.screen-title{
+  margin-top:30px;
+  margin-bottom:12px;
+  padding:12px 15px;
+  background:#ffc629;
+  color:#000;
+  font-size:20px;
+  font-weight:900;
+  border-radius:10px;
+}
+
+.header-row,
+.menu-row{
   display:grid;
-  grid-template-columns:2fr .8fr 1.25fr .45fr;
+  grid-template-columns:
+    42px
+    minmax(180px,1fr)
+    120px
+    170px
+    70px;
+
   gap:10px;
   align-items:center;
 }
-.head{
+
+.header-row{
   color:#aaa;
-  font-size:17px;
+  font-size:15px;
+  margin-bottom:8px;
+  padding:0 5px;
+}
+
+.menu-row{
   margin-bottom:10px;
 }
-.row{margin-bottom:10px}
-.name,.price,.available{
-  width:100%;
-  min-width:0;
-  padding:13px 10px;
-  background:#191919;
-  color:#fff;
-  border:3px solid #444;
-  border-radius:14px;
-  font-size:18px;
+
+.number{
+  color:#ffc629;
+  font-weight:900;
+  text-align:center;
 }
-.new{
+
+input[type="text"],
+input[type="number"],
+select{
+  width:100%;
+  min-height:54px;
+  background:#181818;
+  border:2px solid #444;
+  border-radius:12px;
+  color:#fff;
+  font-size:18px;
+  padding:10px 12px;
+}
+
+input[type="number"]{
+  text-align:center;
+}
+
+.new-box{
+  display:flex;
+  justify-content:center;
+}
+
+input[type="checkbox"]{
   width:30px;
   height:30px;
+  accent-color:#ffc629;
 }
-button{
-  width:100%;
-  padding:22px 8px;
-  margin-top:25px;
-  border:0;
-  border-radius:22px;
-  background:#ffc629;
-  color:#111;
-  font-size:27px;
-  font-weight:900;
-}
-button:disabled{opacity:.55}
-#message{
-  min-height:30px;
-  margin-top:18px;
-  text-align:center;
-  font-size:19px;
-}
-.ok{color:#ffc629}
-.error{color:#ff6961}
 
-@media(max-width:600px){
-  .wrap{padding:24px 16px 50px}
-  .logo{font-size:42px}
-  h1{font-size:28px}
-  .head,.row{
-    grid-template-columns:2fr .8fr 1.25fr .4fr;
-    gap:7px;
+.save{
+  width:100%;
+  margin-top:35px;
+  min-height:80px;
+  border:0;
+  border-radius:20px;
+  background:#ffc629;
+  color:#050505;
+  font-size:28px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.save:disabled{
+  opacity:.55;
+}
+
+.message{
+  text-align:center;
+  min-height:35px;
+  margin-top:18px;
+  color:#ffc629;
+  font-size:20px;
+  font-weight:700;
+}
+
+.help{
+  margin-top:25px;
+  padding:18px;
+  background:#111;
+  border-radius:14px;
+  color:#bbb;
+  line-height:1.5;
+}
+
+.help strong{
+  color:#ffc629;
+}
+
+@media(max-width:700px){
+
+  .wrap{
+    padding:22px 12px 60px;
   }
-  .name,.price,.available{
-    padding:11px 7px;
-    font-size:16px;
+
+  .logo{
+    font-size:45px;
+  }
+
+  h1{
+    font-size:24px;
+  }
+
+  .header-row,
+  .menu-row{
+    grid-template-columns:
+      30px
+      minmax(120px,1fr)
+      70px
+      115px
+      48px;
+
+    gap:6px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select{
+    font-size:15px;
+    padding:8px;
+    min-height:48px;
+  }
+
+  .header-row{
+    font-size:12px;
+  }
+
+  input[type="checkbox"]{
+    width:27px;
+    height:27px;
+  }
+
+  .save{
+    font-size:24px;
   }
 }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
 
   <div class="logo">ЦУП</div>
-  <h1 id="title">Управление меню</h1>
+
+  <h1 id="title">
+    Управление меню
+  </h1>
 
   <input
     id="password"
@@ -115,220 +224,538 @@ button:disabled{opacity:.55}
     autocomplete="current-password"
   >
 
-  <div class="head">
-    <div>Название</div>
-    <div>Цена</div>
-    <div>Статус</div>
-    <div>NEW</div>
-  </div>
-
   <div id="rows"></div>
 
-  <button id="save" type="button">СОХРАНИТЬ МЕНЮ</button>
+  <button
+    id="saveButton"
+    class="save"
+    type="button"
+  >
+    СОХРАНИТЬ МЕНЮ
+  </button>
 
-  <div id="message"></div>
+  <div
+    id="message"
+    class="message"
+  ></div>
+
+  <div class="help">
+    <strong>Три телевизора:</strong><br>
+    Экран №1 — позиции 1–14<br>
+    Экран №2 — позиции 15–28<br>
+    Экран №3 — позиции 29–42
+  </div>
 
 </div>
 
+
 <script>
-const params = new URLSearchParams(window.location.search);
-const store = params.get('store') || 'yurga-stroitelnaya';
 
-const stores = {
-  'leninsk':'Ленинск-Кузнецкий',
-  'yurga-stroitelnaya':'Юрга — Строительная',
-  'yurga-kirpichnaya':'Юрга — Кирпичная',
-  'taiga':'Тайга',
-  'yashkino':'Яшкино',
-  'luna':'Луна'
-};
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
 
-const rows = document.getElementById('rows');
-const message = document.getElementById('message');
-const password = document.getElementById('password');
-const saveButton = document.getElementById('save');
+const store =
+  params.get("store") ||
+  "yurga-stroitelnaya";
 
-document.getElementById('title').textContent =
-  'Управление: ' + (stores[store] || store);
+const TOTAL_ITEMS = 42;
+const ITEMS_PER_SCREEN = 14;
 
-function showMessage(text,type=''){
-  message.textContent=text;
-  message.className=type;
-}
+
+const rowsElement =
+  document.getElementById("rows");
+
+const titleElement =
+  document.getElementById("title");
+
+const passwordElement =
+  document.getElementById("password");
+
+const saveButton =
+  document.getElementById("saveButton");
+
+const messageElement =
+  document.getElementById("message");
+
 
 function blankItem(){
+
   return {
-    name:'',
+    name:"",
     price:0,
     available:true,
     new:false
   };
+
 }
 
-function escapeHTML(value){
-  return String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
 
-function draw(items){
-  rows.innerHTML='';
+function createRows(items){
 
-  const list=Array.isArray(items) ? [...items] : [];
+  rowsElement.innerHTML = "";
 
-  while(list.length<14){
-    list.push(blankItem());
-  }
+  for(
+    let screen = 1;
+    screen <= 3;
+    screen++
+  ){
 
-  list.slice(0,14).forEach(item=>{
-    const row=document.createElement('div');
-    row.className='row';
+    const title =
+      document.createElement("div");
 
-    row.innerHTML=`
-      <input
-        class="name"
-        type="text"
-        value="${escapeHTML(item.name)}"
-      >
+    title.className =
+      "screen-title";
 
-      <input
-        class="price"
-        type="number"
-        min="0"
-        step="1"
-        value="${Number(item.price)||0}"
-      >
+    const start =
+      (screen - 1) *
+      ITEMS_PER_SCREEN + 1;
 
-      <select class="available">
-        <option value="true"
-          ${item.available !== false ? 'selected' : ''}>
-          В наличии
-        </option>
+    const end =
+      screen *
+      ITEMS_PER_SCREEN;
 
-        <option value="false"
-          ${item.available === false ? 'selected' : ''}>
-          Скрыть
-        </option>
-      </select>
+    title.textContent =
+      "ТЕЛЕВИЗОР №" +
+      screen +
+      " — позиции " +
+      start +
+      "–" +
+      end;
 
-      <input
-        class="new"
-        type="checkbox"
-        ${item.new === true ? 'checked' : ''}
-      >
-    `;
+    rowsElement.appendChild(title);
 
-    rows.appendChild(row);
-  });
-}
 
-async function loadMenu(){
-  showMessage('Загрузка меню…');
+    const header =
+      document.createElement("div");
 
-  try{
-    const response=await fetch(
-      '/api/menu?store='+
-      encodeURIComponent(store)+
-      '&t='+Date.now(),
-      {cache:'no-store'}
-    );
+    header.className =
+      "header-row";
 
-    const data=await response.json();
+    header.innerHTML =
+      "<div>№</div>" +
+      "<div>Название</div>" +
+      "<div>Цена</div>" +
+      "<div>Статус</div>" +
+      "<div>NEW</div>";
 
-    if(!response.ok || data.ok === false){
-      throw new Error(data.error || 'Ошибка загрузки');
+    rowsElement.appendChild(header);
+
+
+    for(
+      let i = start - 1;
+      i < end;
+      i++
+    ){
+
+      const item =
+        items[i] ||
+        blankItem();
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "menu-row";
+
+      row.dataset.index = i;
+
+
+      const number =
+        document.createElement("div");
+
+      number.className =
+        "number";
+
+      number.textContent =
+        i + 1;
+
+
+      const name =
+        document.createElement("input");
+
+      name.type =
+        "text";
+
+      name.className =
+        "item-name";
+
+      name.placeholder =
+        "Название пива";
+
+      name.value =
+        item.name || "";
+
+
+      const price =
+        document.createElement("input");
+
+      price.type =
+        "number";
+
+      price.className =
+        "item-price";
+
+      price.min =
+        "0";
+
+      price.step =
+        "1";
+
+      price.value =
+        Number(item.price) || 0;
+
+
+      const available =
+        document.createElement("select");
+
+      available.className =
+        "item-available";
+
+      const yes =
+        document.createElement("option");
+
+      yes.value =
+        "true";
+
+      yes.textContent =
+        "В наличии";
+
+
+      const no =
+        document.createElement("option");
+
+      no.value =
+        "false";
+
+      no.textContent =
+        "Скрыть";
+
+
+      available.appendChild(yes);
+      available.appendChild(no);
+
+      available.value =
+        item.available === false
+          ? "false"
+          : "true";
+
+
+      const newBox =
+        document.createElement("div");
+
+      newBox.className =
+        "new-box";
+
+
+      const isNew =
+        document.createElement("input");
+
+      isNew.type =
+        "checkbox";
+
+      isNew.className =
+        "item-new";
+
+      isNew.checked =
+        item.new === true;
+
+
+      newBox.appendChild(isNew);
+
+
+      row.appendChild(number);
+      row.appendChild(name);
+      row.appendChild(price);
+      row.appendChild(available);
+      row.appendChild(newBox);
+
+
+      rowsElement.appendChild(row);
     }
-
-    draw(data.items || []);
-    showMessage('');
-
-  }catch(error){
-    console.error(error);
-    draw([]);
-    showMessage(
-      'Ошибка загрузки: '+error.message,
-      'error'
-    );
   }
 }
+
 
 function collectItems(){
-  return [...document.querySelectorAll('.row')]
-    .map(row=>({
-      name:row.querySelector('.name').value.trim(),
-      price:Number(row.querySelector('.price').value)||0,
-      available:
-        row.querySelector('.available').value==='true',
-      new:row.querySelector('.new').checked
-    }))
-    .filter(item=>item.name!=='');
+
+  const rows =
+    document.querySelectorAll(
+      ".menu-row"
+    );
+
+  const items = [];
+
+
+  rows.forEach(row => {
+
+    const name =
+      row.querySelector(
+        ".item-name"
+      ).value.trim();
+
+
+    const price =
+      Number(
+        row.querySelector(
+          ".item-price"
+        ).value
+      ) || 0;
+
+
+    const available =
+      row.querySelector(
+        ".item-available"
+      ).value === "true";
+
+
+    const isNew =
+      row.querySelector(
+        ".item-new"
+      ).checked;
+
+
+    items.push({
+      name,
+      price,
+      available,
+      new:isNew
+    });
+
+  });
+
+
+  return items;
 }
 
-saveButton.addEventListener('click',async()=>{
-  if(!password.value){
-    showMessage(
-      'Введите пароль администратора',
-      'error'
-    );
-    password.focus();
+
+async function loadMenu(){
+
+  messageElement.textContent =
+    "Загрузка меню...";
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/menu?store=" +
+        encodeURIComponent(store) +
+        "&t=" +
+        Date.now(),
+        {
+          cache:"no-store"
+        }
+      );
+
+
+    if(!response.ok){
+
+      let errorText =
+        "Ошибка загрузки";
+
+      try{
+
+        const errorData =
+          await response.json();
+
+        errorText =
+          errorData.error ||
+          errorText;
+
+      }catch(e){}
+
+
+      throw new Error(
+        errorText
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    titleElement.textContent =
+      "Управление: " +
+      (
+        data.storeName ||
+        store
+      );
+
+
+    let items =
+      Array.isArray(data.items)
+        ? data.items
+        : [];
+
+
+    while(
+      items.length <
+      TOTAL_ITEMS
+    ){
+
+      items.push(
+        blankItem()
+      );
+
+    }
+
+
+    items =
+      items.slice(
+        0,
+        TOTAL_ITEMS
+      );
+
+
+    createRows(items);
+
+
+    messageElement.textContent =
+      "";
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    createRows([]);
+
+    messageElement.textContent =
+      "Не удалось загрузить меню: " +
+      error.message;
+  }
+}
+
+
+async function saveMenu(){
+
+  const password =
+    passwordElement.value;
+
+
+  if(!password){
+
+    messageElement.textContent =
+      "Введите пароль администратора";
+
+    passwordElement.focus();
+
     return;
   }
 
-  saveButton.disabled=true;
-  showMessage('Сохраняю…');
+
+  const items =
+    collectItems();
+
+
+  saveButton.disabled =
+    true;
+
+  saveButton.textContent =
+    "СОХРАНЯЕМ...";
+
+  messageElement.textContent =
+    "Сохранение...";
+
 
   try{
-    const response=await fetch(
-      '/api/menu?store='+encodeURIComponent(store),
-      {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-admin-password':password.value
-        },
-        body:JSON.stringify({
-          items:collectItems()
-        })
-      }
-    );
 
-    let data;
+    const response =
+      await fetch(
+        "/api/menu?store=" +
+        encodeURIComponent(store),
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json",
+
+            "x-admin-password":
+              password
+          },
+
+          body:JSON.stringify({
+            items
+          })
+        }
+      );
+
+
+    let data = {};
 
     try{
-      data=await response.json();
-    }catch{
+
+      data =
+        await response.json();
+
+    }catch(e){}
+
+
+    if(!response.ok){
+
       throw new Error(
-        'Сервер вернул неправильный ответ'
+        data.error ||
+        (
+          "Ошибка сервера " +
+          response.status
+        )
       );
     }
 
-    if(!response.ok || data.ok !== true){
-      throw new Error(
-        data.error || 'Ошибка сохранения'
-      );
-    }
 
-    showMessage(
-      '✓ МЕНЮ СОХРАНЕНО',
-      'ok'
+    messageElement.textContent =
+      "✓ МЕНЮ СОХРАНЕНО";
+
+
+    setTimeout(
+      () => {
+
+        if(
+          messageElement.textContent ===
+          "✓ МЕНЮ СОХРАНЕНО"
+        ){
+
+          messageElement.textContent =
+            "";
+        }
+
+      },
+      5000
     );
 
-  }catch(error){
+  }
+  catch(error){
+
     console.error(error);
 
-    showMessage(
-      'Ошибка: '+error.message,
-      'error'
-    );
+    messageElement.textContent =
+      "Ошибка сохранения: " +
+      error.message;
 
-  }finally{
-    saveButton.disabled=false;
   }
-});
+  finally{
+
+    saveButton.disabled =
+      false;
+
+    saveButton.textContent =
+      "СОХРАНИТЬ МЕНЮ";
+  }
+}
+
+
+saveButton.addEventListener(
+  "click",
+  saveMenu
+);
+
 
 loadMenu();
+
 </script>
 
 </body>
