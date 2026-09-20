@@ -25,23 +25,23 @@ body{
   margin-bottom:10px;
 }
 h1{
-  margin:0 0 30px;
   color:#aaa;
   font-size:36px;
+  margin:0 0 30px;
 }
 .password{
   width:100%;
   padding:18px;
-  background:#171717;
-  color:#fff;
-  border:3px solid #444;
-  border-radius:20px;
   font-size:24px;
-  margin-bottom:28px;
+  color:#fff;
+  background:#181818;
+  border:3px solid #444;
+  border-radius:18px;
+  margin-bottom:30px;
 }
 .head,.row{
   display:grid;
-  grid-template-columns:2fr 1fr 1.55fr .55fr;
+  grid-template-columns:2fr 1fr 1.5fr .5fr;
   gap:12px;
   align-items:center;
 }
@@ -50,29 +50,26 @@ h1{
   font-size:20px;
   margin-bottom:10px;
 }
-.row{margin-bottom:14px}
+.row{margin-bottom:12px}
 input,select{
   width:100%;
-  min-width:0;
-  padding:16px 12px;
-  background:#171717;
-  color:white;
+  background:#181818;
+  color:#fff;
   border:3px solid #444;
-  border-radius:18px;
-  font-size:21px;
+  border-radius:14px;
+  padding:14px;
+  font-size:20px;
 }
 .check{
-  width:42px;
-  height:42px;
-  margin:auto;
-  display:block;
+  width:32px;
+  height:32px;
 }
 button{
   width:100%;
-  margin-top:28px;
-  padding:25px 10px;
+  margin-top:25px;
+  padding:22px;
   border:0;
-  border-radius:25px;
+  border-radius:22px;
   background:#ffc629;
   color:#168cff;
   font-size:30px;
@@ -83,80 +80,76 @@ button{
   margin-top:18px;
   font-size:20px;
 }
-@media(max-width:650px){
-  .wrap{padding:25px 14px 50px}
-  .logo{font-size:42px}
-  h1{font-size:29px}
-  .head,.row{
-    grid-template-columns:2fr .9fr 1.5fr .45fr;
-    gap:7px;
-  }
-  input,select{
-    font-size:17px;
-    padding:13px 8px;
-  }
-  .head{font-size:16px}
-  .check{width:38px;height:38px}
-}
 </style>
 </head>
 
 <body>
 <div class="wrap">
+  <div class="logo">ЦУП</div>
+  <h1 id="title">Управление меню</h1>
 
-<div class="logo">ЦУП</div>
-<h1>Управление: <span id="storeName"></span></h1>
+  <input id="password" class="password"
+         type="password"
+         placeholder="Пароль администратора">
 
-<input
-  id="password"
-  class="password"
-  type="password"
-  placeholder="Пароль администратора"
->
+  <div class="head">
+    <div>Название</div>
+    <div>Цена</div>
+    <div>Статус</div>
+    <div>NEW</div>
+  </div>
 
-<div class="head">
-  <div>Название</div>
-  <div>Цена</div>
-  <div>Статус</div>
-  <div>NEW</div>
-</div>
+  <div id="rows"></div>
 
-<div id="rows"></div>
-
-<button onclick="saveMenu()">СОХРАНИТЬ МЕНЮ</button>
-
-<div id="msg"></div>
-
+  <button onclick="saveMenu()">СОХРАНИТЬ МЕНЮ</button>
+  <div id="msg"></div>
 </div>
 
 <script>
-const store = location.pathname.split('/').filter(Boolean).pop();
+const params = new URLSearchParams(window.location.search);
+const store = params.get('store') || 'leninsk';
 
 const names = {
-  leninsk:'Ленинск-Кузнецкий',
+  'leninsk':'Ленинск-Кузнецкий',
   'yurga-stroitelnaya':'Юрга — Строительная',
   'yurga-kirpichnaya':'Юрга — Кирпичная',
-  taiga:'Тайга',
-  yashkino:'Яшкино',
-  luna:'Луна'
+  'taiga':'Тайга',
+  'yashkino':'Яшкино',
+  'luna':'Луна'
 };
 
-document.getElementById('storeName').textContent =
-  names[store] || store;
+document.getElementById('title').textContent =
+  'Управление: ' + (names[store] || store);
 
-let items=[];
+let menu=[];
 
 async function loadMenu(){
   const msg=document.getElementById('msg');
-
   try{
-    const response=await fetch('/api/menu/'+store+'?t='+Date.now());
-    if(!response.ok) throw new Error();
+    const r=await fetch('/api/menu/'+encodeURIComponent(store),{
+      cache:'no-store'
+    });
 
-    const data=await response.json();
-    items=Array.isArray(data) ? data : (data.items || []);
+    if(!r.ok) throw new Error();
+
+    menu=await r.json();
+
+    if(!Array.isArray(menu)){
+      if(Array.isArray(menu.items)) menu=menu.items;
+      else menu=[];
+    }
+
+    while(menu.length<14){
+      menu.push({
+        name:'',
+        price:0,
+        available:true,
+        isNew:false
+      });
+    }
 
     render();
+    msg.textContent='';
   }catch(e){
     msg.textContent='Не удалось загрузить меню';
   }
@@ -166,92 +159,70 @@ function render(){
   const box=document.getElementById('rows');
   box.innerHTML='';
 
-  items.forEach((item,i)=>{
+  menu.forEach((item,i)=>{
     const row=document.createElement('div');
     row.className='row';
 
     row.innerHTML=`
-      <input
-        class="name"
-        value="${escapeHtml(item.name || '')}"
-        placeholder="Название"
-      >
-
-      <input
-        class="price"
-        type="number"
-        value="${Number(item.price) || 0}"
-        placeholder="Цена"
-      >
-
+      <input class="name" value="${escapeHtml(item.name || '')}">
+      <input class="price" type="number" value="${Number(item.price)||0}">
       <select class="available">
-        <option value="true" ${item.available!==false?'selected':''}>
-          В наличии
-        </option>
-        <option value="false" ${item.available===false?'selected':''}>
-          Скрыть
-        </option>
+        <option value="true" ${item.available!==false?'selected':''}>В наличии</option>
+        <option value="false" ${item.available===false?'selected':''}>Скрыть</option>
       </select>
-
-      <input
-        class="check"
-        type="checkbox"
-        ${item.isNew?'checked':''}
-      >
+      <input class="check new" type="checkbox" ${item.isNew?'checked':''}>
     `;
 
     box.appendChild(row);
   });
 }
 
-function escapeHtml(text){
-  return String(text)
-    .replaceAll('&','&amp;')
-    .replaceAll('"','&quot;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;');
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/"/g,'&quot;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
 }
 
 async function saveMenu(){
-  const password=document.getElementById('password').value;
   const rows=[...document.querySelectorAll('.row')];
-  const msg=document.getElementById('msg');
 
-  if(!password){
-    msg.textContent='Введите пароль администратора';
-    return;
-  }
-
-  const updated=rows.map(row=>({
+  const items=rows.map(row=>({
     name:row.querySelector('.name').value.trim(),
     price:Number(row.querySelector('.price').value)||0,
     available:row.querySelector('.available').value==='true',
-    isNew:row.querySelector('.check').checked
+    isNew:row.querySelector('.new').checked
   }));
+
+  const password=document.getElementById('password').value;
+  const msg=document.getElementById('msg');
 
   msg.textContent='Сохраняю...';
 
   try{
-    const response=await fetch('/api/menu/'+store,{
-      method:'POST',
+    const r=await fetch('/api/menu/'+encodeURIComponent(store),{
+      method:'PUT',
       headers:{
         'Content-Type':'application/json',
         'x-admin-password':password
       },
-      body:JSON.stringify({items:updated})
+      body:JSON.stringify(items)
     });
 
-    if(response.status===401){
-      msg.textContent='Неверный пароль';
+    if(!r.ok){
+      if(r.status===401 || r.status===403){
+        msg.textContent='Неверный пароль';
+      }else{
+        msg.textContent='Ошибка сохранения';
+      }
       return;
     }
 
-    if(!response.ok) throw new Error();
-
-    items=updated;
     msg.textContent='✓ Меню сохранено';
+    menu=items;
   }catch(e){
-    msg.textContent='Ошибка сохранения';
+    msg.textContent='Ошибка соединения';
   }
 }
 
