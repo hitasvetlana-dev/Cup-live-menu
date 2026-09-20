@@ -1,5 +1,261 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ЦУП — Админка</title><style>*{box-sizing:border-box}body{margin:auto;max-width:1000px;padding:22px;background:#080808;color:#fff;font-family:Arial,sans-serif}h1{color:#ffc629;margin-bottom:5px}h2{color:#aaa;margin-top:0}input,select{background:#181818;color:#fff;border:2px solid #444;border-radius:12px;padding:12px;font-size:17px;width:100%}#pw{margin:12px 0 20px}.head,.row{display:grid;grid-template-columns:2fr 100px 170px 60px;gap:8px;align-items:center;margin-bottom:9px}.head{color:#aaa}.new{width:30px;height:30px}button{width:100%;background:#ffc629;border:0;border-radius:16px;padding:18px;margin-top:16px;font-size:22px;font-weight:900}#msg{text-align:center;color:#ffc629;font-size:18px;margin:15px}@media(max-width:650px){body{padding:14px}.head,.row{grid-template-columns:2fr 75px 120px 45px;gap:5px}input,select{font-size:15px;padding:10px 6px}}</style></head><body><h1>ЦУП</h1><h2 id="title">Управление меню</h2><input id="pw" type="password" placeholder="Пароль администратора"><div class="head"><div>Название</div><div>Цена</div><div>Статус</div><div>NEW</div></div><div id="rows"></div><button onclick="save()">СОХРАНИТЬ МЕНЮ</button><div id="msg"></div><script>
-const store=location.pathname.split('/').filter(Boolean)[1]||'leninsk';
-function make(x={}){const r=document.createElement('div');r.className='row';r.innerHTML='<input class="n"><input class="p" type="number"><select class="s"><option value="sale">В наличии</option><option value="way">В пути</option><option value="hidden">Скрыть</option></select><input class="new" type="checkbox">';r.querySelector('.n').value=x.name||'';r.querySelector('.p').value=x.price||0;r.querySelector('.s').value=x.status||'sale';r.querySelector('.new').checked=!!x.new;return r}
-async function load(){const r=await fetch('/api/menu/'+store+'?t='+Date.now(),{cache:'no-store'}),d=await r.json();document.getElementById('title').textContent='Управление: '+(d.store||store);const box=document.getElementById('rows');box.innerHTML='';const a=d.items||[];for(let i=0;i<Math.max(14,a.length);i++)box.appendChild(make(a[i]))}
-async function save(){const items=[...document.querySelectorAll('.row')].map(r=>({name:r.querySelector('.n').value.trim(),price:Number(r.querySelector('.p').value)||0,status:r.querySelector('.s').value,new:r.querySelector('.new').checked})).filter(x=>x.name);const r=await fetch('/api/menu/'+store,{method:'PUT',headers:{'Content-Type':'application/json','x-admin-password':document.getElementById('pw').value},body:JSON.stringify({items})});const m=document.getElementById('msg');m.textContent=r.ok?'✓ Меню сохранено':((await r.json().catch(()=>({}))).error||'Ошибка')}</script><script>load()</script></body></html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ЦУП — Управление меню</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#050505;
+  color:#fff;
+  font-family:Arial,sans-serif;
+}
+.wrap{
+  max-width:1000px;
+  margin:auto;
+  padding:30px 26px 60px;
+}
+.logo{
+  color:#ffc629;
+  font-size:48px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+h1{
+  margin:0 0 30px;
+  color:#aaa;
+  font-size:36px;
+}
+.password{
+  width:100%;
+  padding:18px;
+  background:#171717;
+  color:#fff;
+  border:3px solid #444;
+  border-radius:20px;
+  font-size:24px;
+  margin-bottom:28px;
+}
+.head,.row{
+  display:grid;
+  grid-template-columns:2fr 1fr 1.55fr .55fr;
+  gap:12px;
+  align-items:center;
+}
+.head{
+  color:#aaa;
+  font-size:20px;
+  margin-bottom:10px;
+}
+.row{margin-bottom:14px}
+input,select{
+  width:100%;
+  min-width:0;
+  padding:16px 12px;
+  background:#171717;
+  color:white;
+  border:3px solid #444;
+  border-radius:18px;
+  font-size:21px;
+}
+.check{
+  width:42px;
+  height:42px;
+  margin:auto;
+  display:block;
+}
+button{
+  width:100%;
+  margin-top:28px;
+  padding:25px 10px;
+  border:0;
+  border-radius:25px;
+  background:#ffc629;
+  color:#168cff;
+  font-size:30px;
+  font-weight:900;
+}
+#msg{
+  text-align:center;
+  margin-top:18px;
+  font-size:20px;
+}
+@media(max-width:650px){
+  .wrap{padding:25px 14px 50px}
+  .logo{font-size:42px}
+  h1{font-size:29px}
+  .head,.row{
+    grid-template-columns:2fr .9fr 1.5fr .45fr;
+    gap:7px;
+  }
+  input,select{
+    font-size:17px;
+    padding:13px 8px;
+  }
+  .head{font-size:16px}
+  .check{width:38px;height:38px}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<div class="logo">ЦУП</div>
+<h1>Управление: <span id="storeName"></span></h1>
+
+<input
+  id="password"
+  class="password"
+  type="password"
+  placeholder="Пароль администратора"
+>
+
+<div class="head">
+  <div>Название</div>
+  <div>Цена</div>
+  <div>Статус</div>
+  <div>NEW</div>
+</div>
+
+<div id="rows"></div>
+
+<button onclick="saveMenu()">СОХРАНИТЬ МЕНЮ</button>
+
+<div id="msg"></div>
+
+</div>
+
+<script>
+const store = location.pathname.split('/').filter(Boolean).pop();
+
+const names = {
+  leninsk:'Ленинск-Кузнецкий',
+  'yurga-stroitelnaya':'Юрга — Строительная',
+  'yurga-kirpichnaya':'Юрга — Кирпичная',
+  taiga:'Тайга',
+  yashkino:'Яшкино',
+  luna:'Луна'
+};
+
+document.getElementById('storeName').textContent =
+  names[store] || store;
+
+let items=[];
+
+async function loadMenu(){
+  const msg=document.getElementById('msg');
+
+  try{
+    const response=await fetch('/api/menu/'+store+'?t='+Date.now());
+    if(!response.ok) throw new Error();
+
+    const data=await response.json();
+    items=Array.isArray(data) ? data : (data.items || []);
+
+    render();
+  }catch(e){
+    msg.textContent='Не удалось загрузить меню';
+  }
+}
+
+function render(){
+  const box=document.getElementById('rows');
+  box.innerHTML='';
+
+  items.forEach((item,i)=>{
+    const row=document.createElement('div');
+    row.className='row';
+
+    row.innerHTML=`
+      <input
+        class="name"
+        value="${escapeHtml(item.name || '')}"
+        placeholder="Название"
+      >
+
+      <input
+        class="price"
+        type="number"
+        value="${Number(item.price) || 0}"
+        placeholder="Цена"
+      >
+
+      <select class="available">
+        <option value="true" ${item.available!==false?'selected':''}>
+          В наличии
+        </option>
+        <option value="false" ${item.available===false?'selected':''}>
+          Скрыть
+        </option>
+      </select>
+
+      <input
+        class="check"
+        type="checkbox"
+        ${item.isNew?'checked':''}
+      >
+    `;
+
+    box.appendChild(row);
+  });
+}
+
+function escapeHtml(text){
+  return String(text)
+    .replaceAll('&','&amp;')
+    .replaceAll('"','&quot;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;');
+}
+
+async function saveMenu(){
+  const password=document.getElementById('password').value;
+  const rows=[...document.querySelectorAll('.row')];
+  const msg=document.getElementById('msg');
+
+  if(!password){
+    msg.textContent='Введите пароль администратора';
+    return;
+  }
+
+  const updated=rows.map(row=>({
+    name:row.querySelector('.name').value.trim(),
+    price:Number(row.querySelector('.price').value)||0,
+    available:row.querySelector('.available').value==='true',
+    isNew:row.querySelector('.check').checked
+  }));
+
+  msg.textContent='Сохраняю...';
+
+  try{
+    const response=await fetch('/api/menu/'+store,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-admin-password':password
+      },
+      body:JSON.stringify({items:updated})
+    });
+
+    if(response.status===401){
+      msg.textContent='Неверный пароль';
+      return;
+    }
+
+    if(!response.ok) throw new Error();
+
+    items=updated;
+    msg.textContent='✓ Меню сохранено';
+  }catch(e){
+    msg.textContent='Ошибка сохранения';
+  }
+}
+
+loadMenu();
+</script>
+</body>
+</html>
