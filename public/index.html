@@ -2,14 +2,11 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>ЦУП — Пивное меню</title>
 
 <style>
-
 *{
   box-sizing:border-box;
 }
@@ -24,11 +21,10 @@ html,body{
 }
 
 body{
-  color:white;
+  color:#fff;
 }
 
-/* ФОНОВОЕ ИЗОБРАЖЕНИЕ */
-
+/* ПРАВИЛЬНЫЙ ФОН С КОСМОНАВТОМ */
 .background{
   position:fixed;
   inset:0;
@@ -36,11 +32,11 @@ body{
   background:
     linear-gradient(
       90deg,
-      rgba(0,0,0,.90) 0%,
-      rgba(0,0,0,.80) 48%,
-      rgba(0,0,0,.35) 100%
+      rgba(0,0,0,.68) 0%,
+      rgba(0,0,0,.82) 42%,
+      rgba(0,0,0,.48) 100%
     ),
-    url("beer-bg.png");
+    url("03BFD300-F622-4B6D-B466-26D615008FCD.png");
 
   background-size:cover;
   background-position:center;
@@ -48,8 +44,6 @@ body{
 
   z-index:0;
 }
-
-/* ОСНОВНОЙ ЭКРАН */
 
 .screen{
   position:relative;
@@ -67,7 +61,6 @@ body{
 }
 
 /* ШАПКА */
-
 .header{
   display:flex;
   align-items:flex-end;
@@ -97,7 +90,6 @@ body{
     clamp(58px,6vw,110px);
 
   line-height:.85;
-
   font-weight:900;
   letter-spacing:-4px;
 }
@@ -109,7 +101,6 @@ body{
     clamp(22px,2vw,38px);
 
   font-weight:800;
-
   letter-spacing:2px;
 }
 
@@ -120,17 +111,14 @@ body{
     clamp(18px,1.5vw,29px);
 
   font-weight:700;
-
   text-align:right;
 }
 
-/* МЕНЮ */
-
+/* ДВЕ КОЛОНКИ */
 .menu{
   flex:1;
 
   display:grid;
-
   grid-template-columns:
     minmax(0,1fr)
     minmax(0,1fr);
@@ -145,23 +133,20 @@ body{
   min-width:0;
 }
 
-/* СТРОКА ПИВА */
-
+/* ПОЗИЦИЯ */
 .beer{
   height:
     clamp(65px,8.2vh,100px);
 
   display:grid;
-
   grid-template-columns:
     minmax(0,1fr) auto;
 
   align-items:center;
-
   gap:25px;
 
   border-bottom:
-    1px solid rgba(255,255,255,.13);
+    1px solid rgba(255,255,255,.15);
 }
 
 .name{
@@ -179,7 +164,7 @@ body{
   text-overflow:ellipsis;
 
   text-shadow:
-    0 3px 12px rgba(0,0,0,.9);
+    0 3px 12px rgba(0,0,0,.95);
 }
 
 .price-wrap{
@@ -195,11 +180,10 @@ body{
     clamp(38px,3.7vw,70px);
 
   font-weight:900;
-
   white-space:nowrap;
 
   text-shadow:
-    0 3px 14px rgba(0,0,0,.9);
+    0 3px 14px rgba(0,0,0,.95);
 }
 
 .rub{
@@ -211,31 +195,23 @@ body{
   font-weight:900;
 }
 
-/* NEW */
-
 .new{
   display:inline-block;
 
   margin-left:12px;
-
-  padding:
-    4px 9px;
+  padding:4px 9px;
 
   border-radius:7px;
 
   background:#b92d2d;
-
   color:#fff;
 
   font-size:
     clamp(13px,1vw,18px);
 
   font-weight:900;
-
   vertical-align:middle;
 }
-
-/* ПУСТОЕ МЕНЮ */
 
 .empty{
   grid-column:1 / -1;
@@ -243,8 +219,7 @@ body{
   margin-top:100px;
 
   text-align:center;
-
-  color:#777;
+  color:#aaa;
 
   font-size:
     clamp(30px,3vw,55px);
@@ -252,11 +227,8 @@ body{
   font-weight:700;
 }
 
-/* НИЖНЯЯ СТРОКА */
-
 .footer{
   margin-top:auto;
-
   padding-top:15px;
 
   color:#aaa;
@@ -265,14 +237,12 @@ body{
     clamp(15px,1.15vw,22px);
 
   font-weight:700;
-
   letter-spacing:1px;
 }
 
 .footer span{
   color:#ffc629;
 }
-
 </style>
 </head>
 
@@ -286,9 +256,7 @@ body{
 
     <div class="brand">
 
-      <div class="logo">
-        ЦУП
-      </div>
+      <div class="logo">ЦУП</div>
 
       <div class="subtitle">
         ПИВНОЙ БАР • МАРКЕТ
@@ -296,19 +264,11 @@ body{
 
     </div>
 
-    <div
-      class="store"
-      id="storeName">
-    </div>
+    <div class="store" id="storeName"></div>
 
   </div>
 
-
-  <div
-    class="menu"
-    id="menu">
-  </div>
-
+  <div class="menu" id="menu"></div>
 
   <div class="footer">
     <span>ЦУП</span> — БАР ДЛЯ СВОИХ
@@ -316,82 +276,54 @@ body{
 
 </div>
 
-
 <script>
-
 const params =
-  new URLSearchParams(
-    window.location.search
-  );
+  new URLSearchParams(window.location.search);
 
 const store =
   params.get('store') ||
   'yurga-stroitelnaya';
 
-
 const stores = {
-
-  'leninsk':
-    'Ленинск-Кузнецкий',
-
-  'yurga-stroitelnaya':
-    'Юрга • Строительная',
-
-  'yurga-kirpichnaya':
-    'Юрга • Кирпичная',
-
-  'taiga':
-    'Тайга',
-
-  'yashkino':
-    'Яшкино',
-
-  'luna':
-    'Луна'
-
+  'leninsk':'Ленинск-Кузнецкий',
+  'yurga-stroitelnaya':'Юрга • Строительная',
+  'yurga-kirpichnaya':'Юрга • Кирпичная',
+  'taiga':'Тайга',
+  'yashkino':'Яшкино',
+  'luna':'Луна'
 };
 
-
-document
-  .getElementById('storeName')
-  .textContent =
-  stores[store] || store;
-
+const storeName =
+  document.getElementById('storeName');
 
 const menu =
   document.getElementById('menu');
 
+storeName.textContent =
+  stores[store] || store;
 
 function escapeHTML(value){
-
   return String(value ?? '')
-
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#039;');
-
 }
-
 
 function beerHTML(item){
 
-  const newBadge =
-    item.new
-    ? '<span class="new">NEW</span>'
-    : '';
+  const badge =
+    item.new === true
+      ? '<span class="new">NEW</span>'
+      : '';
 
   return `
-
     <div class="beer">
 
       <div class="name">
-
         ${escapeHTML(item.name)}
-
-        ${newBadge}
-
+        ${badge}
       </div>
 
       <div class="price-wrap">
@@ -400,18 +332,13 @@ function beerHTML(item){
           ${Number(item.price) || 0}
         </div>
 
-        <div class="rub">
-          ₽
-        </div>
+        <div class="rub">₽</div>
 
       </div>
 
     </div>
-
   `;
-
 }
-
 
 function draw(items){
 
@@ -422,18 +349,13 @@ function draw(items){
       item.available !== false
     );
 
-
   if(!visible.length){
 
-    menu.innerHTML = `
-      <div class="empty">
-        Меню обновляется
-      </div>
-    `;
+    menu.innerHTML =
+      '<div class="empty">Меню обновляется</div>';
 
     return;
   }
-
 
   const left =
     visible.slice(0,7);
@@ -441,30 +363,16 @@ function draw(items){
   const right =
     visible.slice(7,14);
 
-
   menu.innerHTML = `
-
     <div class="column">
-
-      ${left
-        .map(beerHTML)
-        .join('')}
-
+      ${left.map(beerHTML).join('')}
     </div>
 
-
     <div class="column">
-
-      ${right
-        .map(beerHTML)
-        .join('')}
-
+      ${right.map(beerHTML).join('')}
     </div>
-
   `;
-
 }
-
 
 async function loadMenu(){
 
@@ -472,21 +380,12 @@ async function loadMenu(){
 
     const response =
       await fetch(
-
         '/api/menu?store=' +
-
         encodeURIComponent(store) +
-
         '&t=' +
-
         Date.now(),
-
-        {
-          cache:'no-store'
-        }
-
+        {cache:'no-store'}
       );
-
 
     if(!response.ok){
       throw new Error(
@@ -494,57 +393,33 @@ async function loadMenu(){
       );
     }
 
-
     const data =
       await response.json();
 
-
-    if(
-      data.storeName
-    ){
-
-      document
-        .getElementById('storeName')
-        .textContent =
+    if(data.storeName){
+      storeName.textContent =
         data.storeName;
-
     }
-
 
     draw(
       Array.isArray(data.items)
-      ? data.items
-      : []
+        ? data.items
+        : []
     );
 
-
   }catch(error){
-
     console.error(
       'Ошибка загрузки меню:',
       error
     );
-
   }
-
 }
 
-
-/* первая загрузка */
-
+/* Загружаем сразу */
 loadMenu();
 
-
-/*
-Экран автоматически проверяет
-изменения каждые 10 секунд.
-Телевизор перезагружать не нужно.
-*/
-
-setInterval(
-  loadMenu,
-  10000
-);
+/* Обновляем меню автоматически */
+setInterval(loadMenu,10000);
 
 </script>
 
