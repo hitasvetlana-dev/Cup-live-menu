@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>ЦУП — Пивное меню</title>
 
@@ -16,363 +16,384 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#050505;
-  font-family:Arial,sans-serif;
-}
-
-body{
+  background:#000;
+  font-family:Arial,Helvetica,sans-serif;
   color:#fff;
 }
 
-/* ПРАВИЛЬНЫЙ ФОН С КОСМОНАВТОМ */
-.background{
-  position:fixed;
-  inset:0;
-
+body{
   background:
     linear-gradient(
       90deg,
-      rgba(0,0,0,.68) 0%,
-      rgba(0,0,0,.82) 42%,
-      rgba(0,0,0,.48) 100%
+      rgba(0,0,0,.08) 0%,
+      rgba(0,0,0,.18) 35%,
+      rgba(0,0,0,.30) 65%,
+      rgba(0,0,0,.12) 100%
     ),
-    url("03BFD300-F622-4B6D-B466-26D615008FCD.png");
-
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-
-  z-index:0;
+    url("03BFD300-F622-4B6D-B466-26D615008FCD.png")
+    center center / cover no-repeat;
 }
 
-.screen{
-  position:relative;
-  z-index:1;
-
+.page{
   width:100vw;
   height:100vh;
-
-  padding:
-    clamp(25px,3vh,55px)
-    clamp(40px,4vw,85px);
-
+  padding:4vh 4.5vw 3vh;
   display:flex;
   flex-direction:column;
 }
 
 /* ШАПКА */
+
 .header{
   display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-
-  border-bottom:
-    clamp(2px,.25vw,5px)
-    solid #ffc629;
-
-  padding-bottom:
-    clamp(12px,1.5vh,24px);
-
-  margin-bottom:
-    clamp(20px,2.5vh,40px);
-}
-
-.brand{
-  display:flex;
-  align-items:baseline;
-  gap:25px;
+  align-items:center;
+  border-bottom:3px solid #ffc629;
+  padding-bottom:2.2vh;
+  min-height:15vh;
 }
 
 .logo{
-  color:#ffc629;
-
-  font-size:
-    clamp(58px,6vw,110px);
-
+  font-size:7vw;
   line-height:.85;
   font-weight:900;
-  letter-spacing:-4px;
+  color:#ffc629;
+  letter-spacing:-.4vw;
+  margin-right:3vw;
 }
 
 .subtitle{
-  color:#fff;
-
-  font-size:
-    clamp(22px,2vw,38px);
-
+  font-size:2.6vw;
   font-weight:800;
-  letter-spacing:2px;
+  letter-spacing:.25vw;
+  white-space:nowrap;
 }
 
 .store{
-  color:#aaa;
-
-  font-size:
-    clamp(18px,1.5vw,29px);
-
+  margin-left:auto;
+  font-size:2vw;
   font-weight:700;
+  color:#ddd;
   text-align:right;
+  max-width:30vw;
 }
 
-/* ДВЕ КОЛОНКИ */
+/* МЕНЮ */
+
 .menu{
   flex:1;
-
   display:grid;
-  grid-template-columns:
-    minmax(0,1fr)
-    minmax(0,1fr);
-
-  column-gap:
-    clamp(55px,6vw,130px);
-
-  align-content:start;
+  grid-template-columns:1fr 1fr;
+  column-gap:7vw;
+  padding-top:4vh;
+  min-height:0;
 }
 
 .column{
-  min-width:0;
+  display:flex;
+  flex-direction:column;
 }
 
-/* ПОЗИЦИЯ */
-.beer{
-  height:
-    clamp(65px,8.2vh,100px);
-
+.item{
+  min-height:9vh;
   display:grid;
-  grid-template-columns:
-    minmax(0,1fr) auto;
-
+  grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
-  gap:25px;
+  gap:2vw;
 
-  border-bottom:
-    1px solid rgba(255,255,255,.15);
+  border-bottom:1px solid rgba(255,255,255,.12);
 }
 
 .name{
-  min-width:0;
-
-  color:#fff;
-
-  font-size:
-    clamp(30px,3vw,58px);
-
+  font-size:2.8vw;
+  line-height:1.05;
   font-weight:800;
-
-  white-space:nowrap;
+  text-shadow:0 2px 5px #000;
   overflow:hidden;
-  text-overflow:ellipsis;
-
-  text-shadow:
-    0 3px 12px rgba(0,0,0,.95);
-}
-
-.price-wrap{
-  display:flex;
-  align-items:baseline;
-  gap:7px;
 }
 
 .price{
   color:#ffc629;
-
-  font-size:
-    clamp(38px,3.7vw,70px);
-
+  font-size:3.4vw;
+  line-height:1;
   font-weight:900;
   white-space:nowrap;
-
-  text-shadow:
-    0 3px 14px rgba(0,0,0,.95);
+  text-shadow:0 2px 5px #000;
 }
 
 .rub{
+  font-size:1.4vw;
+  margin-left:.25vw;
   color:#ffc629;
-
-  font-size:
-    clamp(19px,1.5vw,28px);
-
-  font-weight:900;
 }
 
-.new{
+/* NEW */
+
+.new-badge{
   display:inline-block;
-
-  margin-left:12px;
-  padding:4px 9px;
-
-  border-radius:7px;
-
-  background:#b92d2d;
-  color:#fff;
-
-  font-size:
-    clamp(13px,1vw,18px);
-
-  font-weight:900;
+  margin-left:.7vw;
+  padding:.2vw .45vw;
+  background:#ffc629;
+  color:#000;
+  border-radius:.3vw;
+  font-size:.85vw;
   vertical-align:middle;
+  font-weight:900;
 }
+
+/* НИЖНЯЯ СТРОКА */
+
+.footer{
+  height:5vh;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  color:#ffc629;
+  font-weight:800;
+  font-size:1.2vw;
+  letter-spacing:.1vw;
+}
+
+/* ЕСЛИ МЕНЮ ПУСТО */
 
 .empty{
   grid-column:1 / -1;
-
-  margin-top:100px;
-
-  text-align:center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:50vh;
   color:#aaa;
-
-  font-size:
-    clamp(30px,3vw,55px);
-
+  font-size:2.5vw;
   font-weight:700;
 }
 
-.footer{
-  margin-top:auto;
-  padding-top:15px;
+/* Для узких экранов */
 
-  color:#aaa;
+@media (max-aspect-ratio: 4/3){
+  .logo{
+    font-size:9vw;
+  }
 
-  font-size:
-    clamp(15px,1.15vw,22px);
+  .subtitle{
+    font-size:3vw;
+  }
 
-  font-weight:700;
-  letter-spacing:1px;
-}
+  .store{
+    font-size:2.5vw;
+  }
 
-.footer span{
-  color:#ffc629;
+  .name{
+    font-size:3.1vw;
+  }
+
+  .price{
+    font-size:3.7vw;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="background"></div>
-
-<div class="screen">
+<div class="page">
 
   <div class="header">
 
-    <div class="brand">
-
-      <div class="logo">ЦУП</div>
-
-      <div class="subtitle">
-        ПИВНОЙ БАР • МАРКЕТ
-      </div>
-
+    <div class="logo">
+      ЦУП
     </div>
 
-    <div class="store" id="storeName"></div>
+    <div class="subtitle">
+      ПИВНОЙ БАР • МАРКЕТ
+    </div>
+
+    <div class="store" id="storeName">
+      ЦУП
+    </div>
 
   </div>
 
-  <div class="menu" id="menu"></div>
+  <div class="menu" id="menu">
+  </div>
 
   <div class="footer">
-    <span>ЦУП</span> — БАР ДЛЯ СВОИХ
+    ЦУП — БАР ДЛЯ СВОИХ
   </div>
 
 </div>
 
+
 <script>
-const params =
-  new URLSearchParams(window.location.search);
 
-const store =
-  params.get('store') ||
-  'yurga-stroitelnaya';
+const params = new URLSearchParams(window.location.search);
 
-const stores = {
-  'leninsk':'Ленинск-Кузнецкий',
-  'yurga-stroitelnaya':'Юрга • Строительная',
-  'yurga-kirpichnaya':'Юрга • Кирпичная',
-  'taiga':'Тайга',
-  'yashkino':'Яшкино',
-  'luna':'Луна'
-};
+const store = params.get("store") || "yurga-stroitelnaya";
 
-const storeName =
-  document.getElementById('storeName');
+/*
+  screen=1 → позиции 1–14
+  screen=2 → позиции 15–28
+  screen=3 → позиции 29–42
+*/
 
-const menu =
-  document.getElementById('menu');
+let screen = parseInt(params.get("screen") || "1",10);
 
-storeName.textContent =
-  stores[store] || store;
+if(screen < 1) screen = 1;
+if(screen > 3) screen = 3;
 
-function escapeHTML(value){
-  return String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
+const ITEMS_PER_SCREEN = 14;
+
+const menuElement =
+  document.getElementById("menu");
+
+const storeNameElement =
+  document.getElementById("storeName");
+
+
+function escapeHtml(value){
+
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
-function beerHTML(item){
 
-  const badge =
-    item.new === true
-      ? '<span class="new">NEW</span>'
-      : '';
+function render(items){
 
-  return `
-    <div class="beer">
+  menuElement.innerHTML = "";
 
-      <div class="name">
-        ${escapeHTML(item.name)}
-        ${badge}
-      </div>
+  const availableItems =
+    Array.isArray(items)
+      ? items.filter(item =>
+          item &&
+          item.available !== false &&
+          String(item.name || "").trim() !== ""
+        )
+      : [];
 
-      <div class="price-wrap">
+  /*
+    ВАЖНО:
+    позиции делятся по номеру экрана
+  */
 
-        <div class="price">
-          ${Number(item.price) || 0}
-        </div>
+  const start =
+    (screen - 1) * ITEMS_PER_SCREEN;
 
-        <div class="rub">₽</div>
+  const end =
+    start + ITEMS_PER_SCREEN;
 
-      </div>
+  const screenItems =
+    availableItems.slice(start,end);
 
-    </div>
-  `;
-}
 
-function draw(items){
+  if(screenItems.length === 0){
 
-  const visible =
-    items.filter(item =>
-      item &&
-      item.name &&
-      item.available !== false
-    );
-
-  if(!visible.length){
-
-    menu.innerHTML =
+    menuElement.innerHTML =
       '<div class="empty">Меню обновляется</div>';
 
     return;
   }
 
-  const left =
-    visible.slice(0,7);
 
-  const right =
-    visible.slice(7,14);
+  /*
+    На каждом телевизоре:
+    максимум 14 позиций.
+    7 слева + 7 справа.
+  */
 
-  menu.innerHTML = `
-    <div class="column">
-      ${left.map(beerHTML).join('')}
-    </div>
+  const leftItems =
+    screenItems.slice(0,7);
 
-    <div class="column">
-      ${right.map(beerHTML).join('')}
-    </div>
-  `;
+  const rightItems =
+    screenItems.slice(7,14);
+
+
+  const leftColumn =
+    document.createElement("div");
+
+  leftColumn.className = "column";
+
+
+  const rightColumn =
+    document.createElement("div");
+
+  rightColumn.className = "column";
+
+
+  function createItem(item){
+
+    const row =
+      document.createElement("div");
+
+    row.className = "item";
+
+
+    const name =
+      document.createElement("div");
+
+    name.className = "name";
+
+
+    let nameHtml =
+      escapeHtml(item.name);
+
+
+    if(item.new === true){
+
+      nameHtml +=
+        '<span class="new-badge">NEW</span>';
+    }
+
+
+    name.innerHTML =
+      nameHtml;
+
+
+    const price =
+      document.createElement("div");
+
+    price.className = "price";
+
+
+    const numberPrice =
+      Number(item.price) || 0;
+
+
+    price.innerHTML =
+      escapeHtml(numberPrice) +
+      '<span class="rub">₽</span>';
+
+
+    row.appendChild(name);
+    row.appendChild(price);
+
+    return row;
+  }
+
+
+  leftItems.forEach(item => {
+
+    leftColumn.appendChild(
+      createItem(item)
+    );
+
+  });
+
+
+  rightItems.forEach(item => {
+
+    rightColumn.appendChild(
+      createItem(item)
+    );
+
+  });
+
+
+  menuElement.appendChild(leftColumn);
+  menuElement.appendChild(rightColumn);
 }
+
 
 async function loadMenu(){
 
@@ -380,46 +401,67 @@ async function loadMenu(){
 
     const response =
       await fetch(
-        '/api/menu?store=' +
+        "/api/menu?store=" +
         encodeURIComponent(store) +
-        '&t=' +
+        "&t=" +
         Date.now(),
-        {cache:'no-store'}
+        {
+          cache:"no-store"
+        }
       );
 
+
     if(!response.ok){
+
       throw new Error(
-        'HTTP ' + response.status
+        "Ошибка сервера " +
+        response.status
       );
+
     }
+
 
     const data =
       await response.json();
 
-    if(data.storeName){
-      storeName.textContent =
-        data.storeName;
-    }
 
-    draw(
-      Array.isArray(data.items)
-        ? data.items
-        : []
+    storeNameElement.textContent =
+      data.storeName || store;
+
+
+    render(
+      data.items || []
     );
+
 
   }catch(error){
-    console.error(
-      'Ошибка загрузки меню:',
-      error
-    );
+
+    console.error(error);
+
+    menuElement.innerHTML =
+      '<div class="empty">Меню обновляется</div>';
+
   }
+
 }
 
-/* Загружаем сразу */
+
+/*
+  Загружаем сразу
+*/
+
 loadMenu();
 
-/* Обновляем меню автоматически */
-setInterval(loadMenu,10000);
+
+/*
+  Проверяем изменения каждые 10 секунд.
+  Сотруднику не нужно обновлять телевизор.
+*/
+
+setInterval(
+  loadMenu,
+  10000
+);
 
 </script>
 
