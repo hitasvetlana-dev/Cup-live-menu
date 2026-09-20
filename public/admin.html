@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ЦУП — Управление меню</title>
 
 <style>
@@ -16,81 +16,104 @@ body{
 .wrap{
   max-width:1000px;
   margin:auto;
-  padding:30px 26px 60px;
+  padding:28px 22px 60px;
 }
 .logo{
   color:#ffc629;
   font-size:48px;
   font-weight:900;
-  margin-bottom:10px;
 }
 h1{
-  color:#aaa;
-  font-size:36px;
-  margin:0 0 30px;
+  margin:8px 0 24px;
+  color:#bbb;
+  font-size:34px;
 }
 .password{
   width:100%;
   padding:18px;
-  font-size:24px;
+  margin-bottom:26px;
+  background:#191919;
   color:#fff;
-  background:#181818;
   border:3px solid #444;
-  border-radius:18px;
-  margin-bottom:30px;
+  border-radius:16px;
+  font-size:22px;
 }
 .head,.row{
   display:grid;
-  grid-template-columns:2fr 1fr 1.5fr .5fr;
-  gap:12px;
+  grid-template-columns:2fr .8fr 1.25fr .45fr;
+  gap:10px;
   align-items:center;
 }
 .head{
   color:#aaa;
-  font-size:20px;
+  font-size:17px;
   margin-bottom:10px;
 }
-.row{margin-bottom:12px}
-input,select{
+.row{margin-bottom:10px}
+.name,.price,.available{
   width:100%;
-  background:#181818;
+  min-width:0;
+  padding:13px 10px;
+  background:#191919;
   color:#fff;
   border:3px solid #444;
   border-radius:14px;
-  padding:14px;
-  font-size:20px;
+  font-size:18px;
 }
-.check{
-  width:32px;
-  height:32px;
+.new{
+  width:30px;
+  height:30px;
 }
 button{
   width:100%;
+  padding:22px 8px;
   margin-top:25px;
-  padding:22px;
   border:0;
   border-radius:22px;
   background:#ffc629;
-  color:#168cff;
-  font-size:30px;
+  color:#111;
+  font-size:27px;
   font-weight:900;
 }
-#msg{
-  text-align:center;
+button:disabled{opacity:.55}
+#message{
+  min-height:30px;
   margin-top:18px;
-  font-size:20px;
+  text-align:center;
+  font-size:19px;
+}
+.ok{color:#ffc629}
+.error{color:#ff6961}
+
+@media(max-width:600px){
+  .wrap{padding:24px 16px 50px}
+  .logo{font-size:42px}
+  h1{font-size:28px}
+  .head,.row{
+    grid-template-columns:2fr .8fr 1.25fr .4fr;
+    gap:7px;
+  }
+  .name,.price,.available{
+    padding:11px 7px;
+    font-size:16px;
+  }
 }
 </style>
 </head>
 
 <body>
 <div class="wrap">
+
   <div class="logo">ЦУП</div>
   <h1 id="title">Управление меню</h1>
 
-  <input id="password" class="password"
-         type="password"
-         placeholder="Пароль администратора">
+  <input
+    id="password"
+    class="password"
+    type="password"
+    placeholder="Пароль администратора"
+    autocomplete="current-password"
+  >
 
   <div class="head">
     <div>Название</div>
@@ -101,15 +124,17 @@ button{
 
   <div id="rows"></div>
 
-  <button onclick="saveMenu()">СОХРАНИТЬ МЕНЮ</button>
-  <div id="msg"></div>
+  <button id="save" type="button">СОХРАНИТЬ МЕНЮ</button>
+
+  <div id="message"></div>
+
 </div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const store = params.get('store') || 'leninsk';
+const store = params.get('store') || 'yurga-stroitelnaya';
 
-const names = {
+const stores = {
   'leninsk':'Ленинск-Кузнецкий',
   'yurga-stroitelnaya':'Юрга — Строительная',
   'yurga-kirpichnaya':'Юрга — Кирпичная',
@@ -118,115 +143,193 @@ const names = {
   'luna':'Луна'
 };
 
+const rows = document.getElementById('rows');
+const message = document.getElementById('message');
+const password = document.getElementById('password');
+const saveButton = document.getElementById('save');
+
 document.getElementById('title').textContent =
-  'Управление: ' + (names[store] || store);
+  'Управление: ' + (stores[store] || store);
 
-let menu=[];
-
-async function loadMenu(){
-  const msg=document.getElementById('msg');
-  try{
-    const r=await fetch('/api/menu/'+encodeURIComponent(store),{
-      cache:'no-store'
-    });
-
-    if(!r.ok) throw new Error();
-
-    menu=await r.json();
-
-    if(!Array.isArray(menu)){
-      if(Array.isArray(menu.items)) menu=menu.items;
-      else menu=[];
-    }
-
-    while(menu.length<14){
-      menu.push({
-        name:'',
-        price:0,
-        available:true,
-        isNew:false
-      });
-    }
-
-    render();
-    msg.textContent='';
-  }catch(e){
-    msg.textContent='Не удалось загрузить меню';
-  }
+function showMessage(text,type=''){
+  message.textContent=text;
+  message.className=type;
 }
 
-function render(){
-  const box=document.getElementById('rows');
-  box.innerHTML='';
+function blankItem(){
+  return {
+    name:'',
+    price:0,
+    available:true,
+    new:false
+  };
+}
 
-  menu.forEach((item,i)=>{
+function escapeHTML(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function draw(items){
+  rows.innerHTML='';
+
+  const list=Array.isArray(items) ? [...items] : [];
+
+  while(list.length<14){
+    list.push(blankItem());
+  }
+
+  list.slice(0,14).forEach(item=>{
     const row=document.createElement('div');
     row.className='row';
 
     row.innerHTML=`
-      <input class="name" value="${escapeHtml(item.name || '')}">
-      <input class="price" type="number" value="${Number(item.price)||0}">
+      <input
+        class="name"
+        type="text"
+        value="${escapeHTML(item.name)}"
+      >
+
+      <input
+        class="price"
+        type="number"
+        min="0"
+        step="1"
+        value="${Number(item.price)||0}"
+      >
+
       <select class="available">
-        <option value="true" ${item.available!==false?'selected':''}>В наличии</option>
-        <option value="false" ${item.available===false?'selected':''}>Скрыть</option>
+        <option value="true"
+          ${item.available !== false ? 'selected' : ''}>
+          В наличии
+        </option>
+
+        <option value="false"
+          ${item.available === false ? 'selected' : ''}>
+          Скрыть
+        </option>
       </select>
-      <input class="check new" type="checkbox" ${item.isNew?'checked':''}>
+
+      <input
+        class="new"
+        type="checkbox"
+        ${item.new === true ? 'checked' : ''}
+      >
     `;
 
-    box.appendChild(row);
+    rows.appendChild(row);
   });
 }
 
-function escapeHtml(s){
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/"/g,'&quot;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
-}
-
-async function saveMenu(){
-  const rows=[...document.querySelectorAll('.row')];
-
-  const items=rows.map(row=>({
-    name:row.querySelector('.name').value.trim(),
-    price:Number(row.querySelector('.price').value)||0,
-    available:row.querySelector('.available').value==='true',
-    isNew:row.querySelector('.new').checked
-  }));
-
-  const password=document.getElementById('password').value;
-  const msg=document.getElementById('msg');
-
-  msg.textContent='Сохраняю...';
+async function loadMenu(){
+  showMessage('Загрузка меню…');
 
   try{
-    const r=await fetch('/api/menu/'+encodeURIComponent(store),{
-      method:'PUT',
-      headers:{
-        'Content-Type':'application/json',
-        'x-admin-password':password
-      },
-      body:JSON.stringify(items)
-    });
+    const response=await fetch(
+      '/api/menu?store='+
+      encodeURIComponent(store)+
+      '&t='+Date.now(),
+      {cache:'no-store'}
+    );
 
-    if(!r.ok){
-      if(r.status===401 || r.status===403){
-        msg.textContent='Неверный пароль';
-      }else{
-        msg.textContent='Ошибка сохранения';
-      }
-      return;
+    const data=await response.json();
+
+    if(!response.ok || data.ok === false){
+      throw new Error(data.error || 'Ошибка загрузки');
     }
 
-    msg.textContent='✓ Меню сохранено';
-    menu=items;
-  }catch(e){
-    msg.textContent='Ошибка соединения';
+    draw(data.items || []);
+    showMessage('');
+
+  }catch(error){
+    console.error(error);
+    draw([]);
+    showMessage(
+      'Ошибка загрузки: '+error.message,
+      'error'
+    );
   }
 }
 
+function collectItems(){
+  return [...document.querySelectorAll('.row')]
+    .map(row=>({
+      name:row.querySelector('.name').value.trim(),
+      price:Number(row.querySelector('.price').value)||0,
+      available:
+        row.querySelector('.available').value==='true',
+      new:row.querySelector('.new').checked
+    }))
+    .filter(item=>item.name!=='');
+}
+
+saveButton.addEventListener('click',async()=>{
+  if(!password.value){
+    showMessage(
+      'Введите пароль администратора',
+      'error'
+    );
+    password.focus();
+    return;
+  }
+
+  saveButton.disabled=true;
+  showMessage('Сохраняю…');
+
+  try{
+    const response=await fetch(
+      '/api/menu?store='+encodeURIComponent(store),
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-admin-password':password.value
+        },
+        body:JSON.stringify({
+          items:collectItems()
+        })
+      }
+    );
+
+    let data;
+
+    try{
+      data=await response.json();
+    }catch{
+      throw new Error(
+        'Сервер вернул неправильный ответ'
+      );
+    }
+
+    if(!response.ok || data.ok !== true){
+      throw new Error(
+        data.error || 'Ошибка сохранения'
+      );
+    }
+
+    showMessage(
+      '✓ МЕНЮ СОХРАНЕНО',
+      'ok'
+    );
+
+  }catch(error){
+    console.error(error);
+
+    showMessage(
+      'Ошибка: '+error.message,
+      'error'
+    );
+
+  }finally{
+    saveButton.disabled=false;
+  }
+});
+
 loadMenu();
 </script>
+
 </body>
 </html>
