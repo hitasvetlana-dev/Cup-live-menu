@@ -1,4 +1,265 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ЦУП — Пиво на кранах</title>
-<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#080808;color:#fff;font-family:Arial,sans-serif;overflow:hidden}.screen{width:100vw;height:100vh;padding:3vh 3vw;display:grid;grid-template-columns:36% 1fr;gap:2.5vw}.hero{height:100%;overflow:hidden;border-right:1px solid #332b15;background:#080808}.hero img{width:100%;height:100%;object-fit:contain;object-position:center}.content{height:100%;display:flex;flex-direction:column;min-width:0}.header{height:20%;display:flex;align-items:center;justify-content:space-between;border-bottom:.4vh solid #ffc629}.brand{display:flex;align-items:center;gap:1vw}.crown{color:#ffc629;font-size:3vw}.logo{font-size:5vw;font-weight:900}.heading{text-align:right;color:#ffc629;font-size:2.2vw;font-weight:900}.sub{display:block;color:#aaa;font-size:.43em;letter-spacing:.22em;margin-top:.45em}.store{color:#fff;font-size:.48em;letter-spacing:.08em;margin-top:.6em}.menu{flex:1;padding-top:2.5vh;display:grid;grid-template-columns:1fr 1fr;column-gap:3vw;align-content:start}.item{min-height:9vh;display:flex;align-items:center;gap:.8vw;border-bottom:1px solid #333}.name{flex:1;min-width:0;font-size:1.9vw;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.price{color:#ffc629;font-size:2.25vw;font-weight:900;white-space:nowrap}.badge{margin-left:.35vw;padding:.25em .5em;border-radius:5px;background:#ffc629;color:#090909;font-size:.4em;font-weight:900}.soonTitle{grid-column:1/-1;color:#ffc629;font-size:1.3vw;font-weight:900;letter-spacing:.12em;margin:1.5vh 0 .3vh}.soon{opacity:.58}.empty{color:#777;font-size:1.5vw}</style></head>
-<body><div class="screen"><section class="hero"><img src="/4E59B063-84B3-42EB-9977-CC0A8EAB2EC6.png"></section><main class="content"><header class="header"><div class="brand"><div class="crown">♛</div><div class="logo">ЦУП</div></div><div class="heading">ПИВО НА КРАНАХ<span class="sub">БАР ДЛЯ СВОИХ</span><div class="store" id="store"></div></div></header><div class="menu" id="menu"><div class="empty">Загрузка меню…</div></div></main></div>
-<script>const store=location.pathname.split('/').filter(Boolean)[1]||'leninsk';async function loadMenu(){try{const r=await fetch('/api/menu/'+store+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();document.getElementById('store').textContent=d.store||'';const a=(d.items||[]).filter(x=>x.status==='sale'||!x.status),s=(d.items||[]).filter(x=>x.status==='way'),b=document.getElementById('menu');b.innerHTML='';function add(x,soon){const row=document.createElement('div');row.className='item'+(soon?' soon':'');const n=document.createElement('div');n.className='name';n.textContent=x.name||'';if(x.new){const q=document.createElement('span');q.className='badge';q.textContent='НОВИНКА';n.appendChild(q)}const p=document.createElement('div');p.className='price';p.textContent=(x.price??'')+' ₽';row.append(n,p);b.appendChild(row)}a.forEach(x=>add(x,false));if(s.length){const t=document.createElement('div');t.className='soonTitle';t.textContent='СКОРО НА КРАНАХ';b.appendChild(t);s.forEach(x=>add(x,true))}if(!a.length&&!s.length)b.innerHTML='<div class="empty">Меню обновляется</div>'}catch(e){document.getElementById('menu').innerHTML='<div class="empty">Обновление меню…</div>'}}loadMenu();setInterval(loadMenu,15000)</script></body></html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЦУП — Пиво на кранах</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#030303;
+  font-family:Arial,sans-serif;
+  color:white;
+}
+
+.screen{
+  width:100vw;
+  height:100vh;
+  position:relative;
+  background:#030303;
+  display:flex;
+}
+
+/* КОСМОНАВТ */
+
+.hero{
+  width:40%;
+  height:100%;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:left center;
+}
+
+.hero:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,0) 45%,
+      rgba(0,0,0,.35) 70%,
+      #030303 100%
+    );
+}
+
+/* МЕНЮ */
+
+.menu{
+  width:60%;
+  height:100%;
+  padding:6vh 5vw 4vh 2vw;
+  position:relative;
+  z-index:2;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  border-bottom:5px solid #ffc629;
+  padding-bottom:2vh;
+  margin-bottom:2vh;
+}
+
+.brand{
+  font-size:4.2vw;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.brand span{
+  color:#ffc629;
+}
+
+.heading{
+  text-align:right;
+}
+
+.heading h1{
+  margin:0;
+  color:#ffc629;
+  font-size:2.4vw;
+  font-weight:900;
+}
+
+.heading p{
+  margin:.5vh 0 0;
+  font-size:.85vw;
+  letter-spacing:.4em;
+}
+
+.city{
+  font-size:.75vw;
+  font-weight:700;
+  margin-top:.7vh;
+}
+
+/* СПИСОК */
+
+.beers{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  column-gap:3vw;
+}
+
+.beer{
+  height:8vh;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #444;
+  gap:1vw;
+}
+
+.name{
+  font-size:1.65vw;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.price{
+  color:#ffc629;
+  font-size:2vw;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.empty{
+  opacity:.6;
+}
+
+@media(max-width:900px){
+  .brand{font-size:5vw;}
+  .heading h1{font-size:3vw;}
+  .name{font-size:2vw;}
+  .price{font-size:2.4vw;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="screen">
+
+  <section class="hero">
+    <img src="03BFD300-F622-4B6D-B466-26D615008FCD.png" alt="ЦУП">
+  </section>
+
+  <main class="menu">
+
+    <div class="top">
+
+      <div class="brand">
+        <span>♛</span> ЦУП
+      </div>
+
+      <div class="heading">
+        <h1>ПИВО НА КРАНАХ</h1>
+        <p>БАР ДЛЯ СВОИХ</p>
+        <div class="city">Ленинск-Кузнецкий</div>
+      </div>
+
+    </div>
+
+    <div class="beers" id="beers"></div>
+
+  </main>
+
+</div>
+
+<script>
+
+const demo = [
+  {name:"Пиво 1",price:150},
+  {name:"Пиво 2",price:160},
+  {name:"Пиво 3",price:170},
+  {name:"Пиво 4",price:180},
+  {name:"Пиво 5",price:190},
+  {name:"Пиво 6",price:200},
+  {name:"Пиво 7",price:210},
+  {name:"Пиво 8",price:220},
+  {name:"Пиво 9",price:230},
+  {name:"Пиво 10",price:240}
+];
+
+function draw(items){
+
+  const box=document.getElementById("beers");
+  box.innerHTML="";
+
+  items
+    .filter(x => x.show !== false)
+    .slice(0,14)
+    .forEach(item=>{
+
+      const row=document.createElement("div");
+      row.className="beer";
+
+      const name=document.createElement("div");
+      name.className="name";
+      name.textContent=item.name || "";
+
+      const price=document.createElement("div");
+      price.className="price";
+      price.textContent=(item.price || "")+" ₽";
+
+      row.appendChild(name);
+      row.appendChild(price);
+
+      box.appendChild(row);
+    });
+}
+
+async function load(){
+
+  try{
+
+    const response=await fetch("/api/menu?ts="+Date.now(),{
+      cache:"no-store"
+    });
+
+    if(!response.ok) throw new Error();
+
+    const data=await response.json();
+
+    const items=Array.isArray(data)
+      ? data
+      : (data.items || data.beers || []);
+
+    if(items.length){
+      draw(items);
+    }else{
+      draw(demo);
+    }
+
+  }catch(e){
+    draw(demo);
+  }
+}
+
+load();
+
+/* автоматически обновляем меню */
+setInterval(load,15000);
+
+</script>
+
+</body>
+</html>
