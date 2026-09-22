@@ -41,16 +41,12 @@ app.use(
   )
 );
 
-
 // =======================
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // =======================
 
 function validStore(store) {
-  return Object.prototype.hasOwnProperty.call(
-    STORES,
-    store
-  );
+  return Object.prototype.hasOwnProperty.call(STORES, store);
 }
 
 function getLimit(store) {
@@ -59,18 +55,12 @@ function getLimit(store) {
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(
-      DATA_DIR,
-      { recursive: true }
-    );
+    fs.mkdirSync(DATA_DIR, { recursive: true });
   }
 }
 
 function getFile(store) {
-  return path.join(
-    DATA_DIR,
-    `${store}.json`
-  );
+  return path.join(DATA_DIR, store + '.json');
 }
 
 function blankItem() {
@@ -87,7 +77,9 @@ function defaultItems(store) {
 
   return Array.from(
     { length: limit },
-    () => blankItem()
+    function () {
+      return blankItem();
+    }
   );
 }
 
@@ -100,26 +92,26 @@ function normaliseItems(store, items) {
 
   return items
     .slice(0, limit)
-    .map(item => ({
-      name: String(
-        (item && item.name) || ''
-      ).trim(),
+    .map(function (item) {
+      return {
+        name: String(
+          (item && item.name) || ''
+        ).trim(),
 
-      price:
-        Number(
-          item && item.price
-        ) || 0,
+        price:
+          Number(item && item.price) || 0,
 
-      available:
-        !item ||
-        item.available !== false,
+        available:
+          !item ||
+          item.available !== false,
 
-      new:
-        !!(
-          item &&
-          item.new === true
-        )
-    }));
+        new:
+          !!(
+            item &&
+            item.new === true
+          )
+      };
+    });
 }
 
 function loadStore(store) {
@@ -132,14 +124,8 @@ function loadStore(store) {
   }
 
   try {
-    const raw =
-      fs.readFileSync(
-        file,
-        'utf8'
-      );
-
-    const data =
-      JSON.parse(raw);
+    const raw = fs.readFileSync(file, 'utf8');
+    const data = JSON.parse(raw);
 
     const source =
       Array.isArray(data)
@@ -152,20 +138,12 @@ function loadStore(store) {
           );
 
     const result =
-      normaliseItems(
-        store,
-        source
-      );
+      normaliseItems(store, source);
 
-    const limit =
-      getLimit(store);
+    const limit = getLimit(store);
 
-    while (
-      result.length < limit
-    ) {
-      result.push(
-        blankItem()
-      );
+    while (result.length < limit) {
+      result.push(blankItem());
     }
 
     return result;
@@ -183,14 +161,10 @@ function loadStore(store) {
 function saveStore(store, items) {
   ensureDataDir();
 
-  const file =
-    getFile(store);
+  const file = getFile(store);
 
   const clean =
-    normaliseItems(
-      store,
-      items
-    );
+    normaliseItems(store, items);
 
   fs.writeFileSync(
     file,
@@ -216,321 +190,263 @@ function escapeHtml(value) {
     .replace(/'/g, '&#039;');
 }
 
-
 // =======================
 // ПРОВЕРКА СЕРВЕРА
 // =======================
 
-app.get(
-  '/api/health',
-  (req, res) => {
-    res.json({
-      ok: true,
-      service: 'ЦУП Live Menu'
-    });
-  }
-);
-
+app.get('/api/health', function (req, res) {
+  res.json({
+    ok: true,
+    service: 'ЦУП Live Menu'
+  });
+});
 
 // =======================
 // СПИСОК ТОЧЕК
 // =======================
 
-app.get(
-  '/api/stores',
-  (req, res) => {
-    res.json(STORES);
-  }
-);
-
+app.get('/api/stores', function (req, res) {
+  res.json(STORES);
+});
 
 // =======================
 // ПОЛУЧИТЬ МЕНЮ
 // =======================
 
-app.get(
-  '/api/menu',
-  (req, res) => {
+app.get('/api/menu', function (req, res) {
 
-    const store =
-      String(
-        req.query.store || ''
-      );
+  const store =
+    String(req.query.store || '');
 
-    if (!validStore(store)) {
-      return res
-        .status(400)
-        .json({
-          ok: false,
-          error: 'Неизвестная точка'
-        });
-    }
-
-    try {
-      const items =
-        loadStore(store);
-
-      res.set(
-        'Cache-Control',
-        'no-store, no-cache, must-revalidate'
-      );
-
-      return res.json({
-        ok: true,
-        store,
-        storeName:
-          STORES[store],
-        limit:
-          getLimit(store),
-        items
-      });
-
-    } catch (error) {
-      console.error(
-        'Ошибка загрузки:',
-        error
-      );
-
-      return res
-        .status(500)
-        .json({
-          ok: false,
-          error: 'Ошибка загрузки меню'
-        });
-    }
+  if (!validStore(store)) {
+    return res.status(400).json({
+      ok: false,
+      error: 'Неизвестная точка'
+    });
   }
-);
 
-
-// =======================
-// СОХРАНИТЬ МЕНЮ
-// =======================
-
-app.post(
-  '/api/menu',
-  (req, res) => {
-
-    const store =
-      String(
-        req.query.store || ''
-      );
-
-    if (!validStore(store)) {
-      return res
-        .status(400)
-        .json({
-          ok: false,
-          error: 'Неизвестная точка'
-        });
-    }
-
-    if (!ADMIN_PASSWORD) {
-      return res
-        .status(500)
-        .json({
-          ok: false,
-          error:
-            'Пароль администратора не настроен'
-        });
-    }
-
-    const password =
-      req.get(
-        'x-admin-password'
-      ) ||
-      (
-        req.body &&
-        req.body.password
-      ) ||
-      '';
-
-    if (
-      password !==
-      ADMIN_PASSWORD
-    ) {
-      return res
-        .status(401)
-        .json({
-          ok: false,
-          error:
-            'Неверный пароль администратора'
-        });
-    }
-
-    const items =
-      Array.isArray(req.body)
-        ? req.body
-        : (
-            req.body &&
-            req.body.items
-          );
-
-    if (!Array.isArray(items)) {
-      return res
-        .status(400)
-        .json({
-          ok: false,
-          error:
-            'Неверный формат меню'
-        });
-    }
-
-    try {
-      const saved =
-        saveStore(
-          store,
-          items
-        );
-
-      console.log(
-        `Меню сохранено: ${store}, позиций: ${saved.length}`
-      );
-
-      return res.json({
-        ok: true,
-        message:
-          'Меню сохранено',
-        store,
-        storeName:
-          STORES[store],
-        items: saved
-      });
-
-    } catch (error) {
-      console.error(
-        'Ошибка сохранения:',
-        error
-      );
-
-      return res
-        .status(500)
-        .json({
-          ok: false,
-          error:
-            'Сервер не смог сохранить меню'
-        });
-    }
-  }
-);
-
-
-// =======================
-// ТВ-МЕНЮ
-// БЕЗ JAVASCRIPT НА ТВ
-// =======================
-
-app.get(
-  '/tv',
-  (req, res) => {
-
-    let store =
-      String(
-        req.query.store || ''
-      );
-
-    if (!validStore(store)) {
-      store =
-        'yurga-stroitelnaya';
-    }
-
-    let screen =
-      parseInt(
-        req.query.screen,
-        10
-      );
-
-    if (
-      !screen ||
-      screen < 1
-    ) {
-      screen = 1;
-    }
-
-    const allItems =
-      loadStore(store)
-        .filter(function(item) {
-          return (
-            item &&
-            item.available !== false &&
-            String(
-              item.name || ''
-            ).trim() !== ''
-          );
-        });
-
-    // 14 позиций на один телевизор
-    const ITEMS_PER_SCREEN = 14;
-
-    const start =
-      (screen - 1) *
-      ITEMS_PER_SCREEN;
-
-    const items =
-      allItems.slice(
-        start,
-        start + ITEMS_PER_SCREEN
-      );
-
-    const half =
-      Math.ceil(
-        items.length / 2
-      );
-
-    const left =
-      items.slice(
-        0,
-        half
-      );
-
-    const right =
-      items.slice(
-        half
-      );
-
-    function makeRows(list) {
-      return list
-        .map(function(item) {
-
-          const badge =
-            item.new === true
-              ? '<span class="new-badge">NEW</span>'
-              : '';
-
-          return (
-            '<div class="item">' +
-              '<div class="item-name">' +
-                escapeHtml(item.name) +
-                badge +
-              '</div>' +
-              '<div class="item-price">' +
-                escapeHtml(item.price) +
-                '<span class="ruble">₽</span>' +
-              '</div>' +
-            '</div>'
-          );
-        })
-        .join('');
-    }
+  try {
+    const items = loadStore(store);
 
     res.set(
       'Cache-Control',
       'no-store, no-cache, must-revalidate'
     );
 
-    res.type('html');
+    return res.json({
+      ok: true,
+      store: store,
+      storeName: STORES[store],
+      limit: getLimit(store),
+      items: items
+    });
 
-    res.send(
+  } catch (error) {
+
+    console.error(
+      'Ошибка загрузки:',
+      error
+    );
+
+    return res.status(500).json({
+      ok: false,
+      error: 'Ошибка загрузки меню'
+    });
+  }
+});
+
+// =======================
+// СОХРАНИТЬ МЕНЮ
+// =======================
+
+app.post('/api/menu', function (req, res) {
+
+  const store =
+    String(req.query.store || '');
+
+  if (!validStore(store)) {
+    return res.status(400).json({
+      ok: false,
+      error: 'Неизвестная точка'
+    });
+  }
+
+  if (!ADMIN_PASSWORD) {
+    return res.status(500).json({
+      ok: false,
+      error: 'Пароль администратора не настроен'
+    });
+  }
+
+  const password =
+    req.get('x-admin-password') ||
+    (
+      req.body &&
+      req.body.password
+    ) ||
+    '';
+
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({
+      ok: false,
+      error: 'Неверный пароль администратора'
+    });
+  }
+
+  const items =
+    Array.isArray(req.body)
+      ? req.body
+      : (
+          req.body &&
+          req.body.items
+        );
+
+  if (!Array.isArray(items)) {
+    return res.status(400).json({
+      ok: false,
+      error: 'Неверный формат меню'
+    });
+  }
+
+  try {
+
+    const saved =
+      saveStore(store, items);
+
+    console.log(
+      'Меню сохранено: ' +
+      store +
+      ', позиций: ' +
+      saved.length
+    );
+
+    return res.json({
+      ok: true,
+      message: 'Меню сохранено',
+      store: store,
+      storeName: STORES[store],
+      items: saved
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Ошибка сохранения:',
+      error
+    );
+
+    return res.status(500).json({
+      ok: false,
+      error: 'Сервер не смог сохранить меню'
+    });
+  }
+});
+
+// =============================================
+// ТВ-МЕНЮ
+// 14 ПОЗИЦИЙ — 7 СЛЕВА + 7 СПРАВА
+// БЕЗ JAVASCRIPT НА ТЕЛЕВИЗОРЕ
+// =============================================
+
+app.get('/tv', function (req, res) {
+
+  let store =
+    String(req.query.store || '');
+
+  if (!validStore(store)) {
+    store = 'yurga-stroitelnaya';
+  }
+
+  let screen =
+    parseInt(req.query.screen, 10);
+
+  if (!screen || screen < 1) {
+    screen = 1;
+  }
+
+  const allItems =
+    loadStore(store)
+      .filter(function (item) {
+        return (
+          item &&
+          item.available !== false &&
+          String(item.name || '').trim() !== ''
+        );
+      });
+
+  const ITEMS_PER_SCREEN = 14;
+
+  const start =
+    (screen - 1) *
+    ITEMS_PER_SCREEN;
+
+  const items =
+    allItems.slice(
+      start,
+      start + ITEMS_PER_SCREEN
+    );
+
+  const left =
+    items.slice(0, 7);
+
+  const right =
+    items.slice(7, 14);
+
+  function makeRows(list) {
+
+    return list
+      .map(function (item) {
+
+        const badge =
+          item.new === true
+            ? '<span class="new-badge">NEW</span>'
+            : '';
+
+        return (
+          '<div class="item">' +
+
+            '<div class="item-name">' +
+              escapeHtml(item.name) +
+              badge +
+            '</div>' +
+
+            '<div class="item-price">' +
+              escapeHtml(item.price) +
+              '<span class="ruble"> ₽</span>' +
+            '</div>' +
+
+          '</div>'
+        );
+      })
+      .join('');
+  }
+
+  res.set(
+    'Cache-Control',
+    'no-store, no-cache, must-revalidate'
+  );
+
+  res.type('html');
+
+  res.send(
 `<!DOCTYPE html>
 <html lang="ru">
+
 <head>
+
 <meta charset="UTF-8">
 
-<!-- Автоматически обновляем страницу раз в минуту -->
-<meta http-equiv="refresh" content="60">
+<meta
+  http-equiv="refresh"
+  content="60"
+>
 
-<title>ЦУП — Пивное меню</title>
+<title>
+ЦУП — Пивное меню
+</title>
 
 <style>
+
 * {
   box-sizing: border-box;
 }
@@ -539,80 +455,202 @@ html,
 body {
   margin: 0;
   padding: 0;
+
   width: 100%;
   height: 100%;
+
   overflow: hidden;
-  background: #000;
+
+  background: #050505;
+
   color: #fff;
-  font-family: Arial, Helvetica, sans-serif;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
 }
 
+/* =========================
+   ОСНОВНОЙ ЭКРАН
+   ========================= */
+
 .page {
+
   position: relative;
+
   width: 100vw;
   height: 100vh;
+
   overflow: hidden;
 
-  background-color: #000;
+  background-color: #050505;
 
   background-image:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.30) 0%,
+      rgba(0,0,0,0.72) 60%,
+      rgba(0,0,0,0.20) 100%
+    ),
     url('/03BFD300-F622-4B6D-B466-26D615008FCD.png');
 
   background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
+
+  background-position:
+    center center;
+
+  background-size:
+    cover;
 }
 
-.header {
+/* дополнительное затемнение
+   за ассортиментом */
+
+.menu-background {
+
   position: absolute;
-  left: 4.5%;
-  right: 4.5%;
-  top: 5%;
-  height: 16%;
-  border-bottom: 3px solid #ffc629;
+
+  left: 2.5%;
+  right: 2.5%;
+
+  top: 18%;
+  height: 61%;
+
+  background:
+    rgba(3, 5, 7, 0.76);
+
+  border-top:
+    1px solid rgba(255,198,41,0.55);
+
+  border-bottom:
+    1px solid rgba(255,198,41,0.35);
+}
+
+/* =========================
+   ШАПКА
+   ========================= */
+
+.header {
+
+  position: absolute;
+
+  left: 3.5%;
+  right: 3.5%;
+
+  top: 3%;
+
+  height: 13%;
+
+  border-bottom:
+    3px solid #ffc629;
 }
 
 .logo {
+
   position: absolute;
+
   left: 0;
   top: 0;
+
   color: #ffc629;
-  font-size: 5.7vw;
-  font-weight: bold;
+
+  font-size: 5.2vw;
+
+  font-weight: 900;
+
   line-height: 1;
 }
 
 .subtitle {
+
   position: absolute;
-  left: 17%;
-  top: 18%;
-  font-size: 2.1vw;
-  font-weight: bold;
-  letter-spacing: 0.08em;
+
+  left: 16%;
+
+  top: 12%;
+
+  color: #fff;
+
+  font-size: 2.05vw;
+
+  font-weight: 900;
+
+  letter-spacing: 0.05em;
+}
+
+.slogan {
+
+  position: absolute;
+
+  left: 16%;
+
+  top: 56%;
+
+  color: #c9c9c9;
+
+  font-size: 0.95vw;
+
+  font-weight: 700;
+
+  letter-spacing: 0.28em;
 }
 
 .store-name {
+
   position: absolute;
+
   right: 0;
-  top: 22%;
+
+  top: 16%;
+
+  color: #fff;
+
   font-size: 1.75vw;
-  font-weight: bold;
-  color: #d6d6d6;
+
+  font-weight: 900;
+
   text-align: right;
 }
 
-.menu {
+.store-line {
+
   position: absolute;
-  left: 39%;
-  right: 5%;
-  top: 27%;
-  bottom: 9%;
+
+  right: 0;
+
+  bottom: 18%;
+
+  width: 25%;
+
+  height: 4px;
+
+  background: #ffc629;
+}
+
+/* =========================
+   МЕНЮ
+   ========================= */
+
+.menu {
+
+  position: absolute;
+
+  left: 3.5%;
+  right: 3.5%;
+
+  top: 19.5%;
+
+  height: 57%;
 }
 
 .column {
+
   position: absolute;
+
   top: 0;
-  width: 47%;
+
+  width: 47.5%;
 }
 
 .column-left {
@@ -624,72 +662,169 @@ body {
 }
 
 .item {
+
   position: relative;
+
   width: 100%;
-  height: 8.1vh;
+
+  height: 8vh;
+
   border-bottom:
-    1px solid rgba(255,255,255,0.20);
+    1px solid rgba(255,255,255,0.25);
 }
 
 .item-name {
+
   position: absolute;
+
   left: 0;
+
   top: 50%;
-  width: 72%;
-  transform: translateY(-50%);
-  font-size: 1.8vw;
-  font-weight: bold;
-  line-height: 1.05;
+
+  width: 69%;
+
+  transform:
+    translateY(-50%);
+
   color: #fff;
+
+  font-size: 2.25vw;
+
+  font-weight: 900;
+
+  line-height: 1.02;
+
+  text-shadow:
+    0 2px 4px rgba(0,0,0,0.95);
 }
 
 .item-price {
+
   position: absolute;
+
   right: 0;
+
   top: 50%;
-  transform: translateY(-50%);
+
+  transform:
+    translateY(-50%);
+
   color: #ffc629;
-  font-size: 2.4vw;
-  font-weight: bold;
+
+  font-size: 3.15vw;
+
+  font-weight: 900;
+
   white-space: nowrap;
+
+  text-shadow:
+    0 2px 6px rgba(0,0,0,0.95);
 }
 
 .ruble {
-  font-size: 1.25vw;
-  margin-left: 4px;
+
+  font-size: 1.65vw;
+
+  font-weight: 900;
 }
 
 .new-badge {
+
   display: inline-block;
-  margin-left: 8px;
-  padding: 2px 6px;
-  background: #ffc629;
-  color: #000;
-  font-size: 0.65vw;
-  font-weight: bold;
-  vertical-align: middle;
+
+  margin-left: 10px;
+
+  padding:
+    4px 9px;
+
+  background:
+    #ffc629;
+
+  color:
+    #080808;
+
+  font-size:
+    0.75vw;
+
+  font-weight:
+    900;
+
+  transform:
+    rotate(-4deg);
+
+  vertical-align:
+    middle;
 }
 
-.empty {
+/* =========================
+   НИЖНЯЯ ЗОНА
+   ========================= */
+
+.bottom-slogan {
+
   position: absolute;
-  left: 39%;
-  right: 5%;
-  top: 48%;
-  text-align: center;
-  color: #aaa;
-  font-size: 1.8vw;
-  font-weight: bold;
+
+  left: 48%;
+
+  bottom: 8%;
+
+  color: #fff;
+
+  font-size: 2.1vw;
+
+  font-weight: 800;
+
+  font-style: italic;
+
+  transform: rotate(-3deg);
+
+  text-shadow:
+    0 2px 7px #000;
 }
 
 .footer {
+
   position: absolute;
-  right: 4.5%;
-  bottom: 3%;
-  color: rgba(255,255,255,0.70);
-  font-size: 0.8vw;
-  letter-spacing: 0.08em;
+
+  right: 3.5%;
+
+  bottom: 4%;
+
+  color: #fff;
+
+  font-size: 1.05vw;
+
+  font-weight: 900;
+
+  letter-spacing: 0.24em;
+
+  border-bottom:
+    4px solid #ffc629;
+
+  padding-bottom:
+    7px;
 }
+
+.empty {
+
+  position: absolute;
+
+  left: 10%;
+  right: 10%;
+
+  top: 43%;
+
+  text-align: center;
+
+  color: #fff;
+
+  font-size: 3vw;
+
+  font-weight: 900;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -706,10 +841,20 @@ body {
       ПИВНОЙ БАР • МАРКЕТ
     </div>
 
+    <div class="slogan">
+      БОЛЬШЕ ЧЕМ ПРОСТО ПИВО
+    </div>
+
     <div class="store-name">
       ${escapeHtml(STORES[store])}
     </div>
 
+    <div class="store-line">
+    </div>
+
+  </div>
+
+  <div class="menu-background">
   </div>
 
   ${
@@ -732,6 +877,10 @@ body {
 </div>`
   }
 
+  <div class="bottom-slogan">
+    Пиво нашей орбиты!
+  </div>
+
   <div class="footer">
     ЦУП — БАР ДЛЯ СВОИХ
   </div>
@@ -739,31 +888,26 @@ body {
 </div>
 
 </body>
-</html>`
-    );
-  }
-);
 
+</html>`
+  );
+});
 
 // =======================
 // ГЛАВНАЯ СТРАНИЦА
 // =======================
 
-app.get(
-  '/',
-  (req, res) => {
+app.get('/', function (req, res) {
 
-    res.sendFile(
-      path.join(
-        __dirname,
-        'public',
-        'index.html'
-      )
-    );
+  res.sendFile(
+    path.join(
+      __dirname,
+      'public',
+      'index.html'
+    )
+  );
 
-  }
-);
-
+});
 
 // =======================
 // ЗАПУСК
@@ -772,10 +916,11 @@ app.get(
 app.listen(
   PORT,
   '0.0.0.0',
-  () => {
+  function () {
 
     console.log(
-      `ЦУП Live Menu запущен на порту ${PORT}`
+      'ЦУП Live Menu запущен на порту ' +
+      PORT
     );
 
   }
