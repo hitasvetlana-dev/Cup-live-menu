@@ -88,9 +88,7 @@ function blankItem() {
 }
 
 function defaultItems(store) {
-
-  const limit =
-    getLimit(store);
+  const limit = getLimit(store);
 
   return Array.from(
     {
@@ -108,19 +106,16 @@ function normaliseItems(store, items) {
     return [];
   }
 
-  const limit =
-    getLimit(store);
+  const limit = getLimit(store);
 
   return items
     .slice(0, limit)
     .map(function (item) {
 
       return {
-
-        name:
-          String(
-            (item && item.name) || ''
-          ).trim(),
+        name: String(
+          (item && item.name) || ''
+        ).trim(),
 
         price:
           Number(
@@ -144,8 +139,7 @@ function loadStore(store) {
 
   ensureDataDir();
 
-  const file =
-    getFile(store);
+  const file = getFile(store);
 
   if (!fs.existsSync(file)) {
     return defaultItems(store);
@@ -178,12 +172,9 @@ function loadStore(store) {
         source
       );
 
-    const limit =
-      getLimit(store);
+    const limit = getLimit(store);
 
-    while (
-      result.length < limit
-    ) {
+    while (result.length < limit) {
       result.push(
         blankItem()
       );
@@ -206,8 +197,7 @@ function saveStore(store, items) {
 
   ensureDataDir();
 
-  const file =
-    getFile(store);
+  const file = getFile(store);
 
   const clean =
     normaliseItems(
@@ -242,9 +232,7 @@ function saveStore(store, items) {
 function escapeHtml(value) {
 
   return String(
-    value == null
-      ? ''
-      : value
+    value == null ? '' : value
   )
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -301,8 +289,7 @@ app.get(
         .status(400)
         .json({
           ok: false,
-          error:
-            'Неизвестная точка'
+          error: 'Неизвестная точка'
         });
     }
 
@@ -313,24 +300,15 @@ app.get(
 
       res.set(
         'Cache-Control',
-        'no-store, no-cache, must-revalidate'
+        'no-store, no-cache, must-revalidate, max-age=0'
       );
 
       return res.json({
-
         ok: true,
-
-        store:
-          store,
-
-        storeName:
-          STORES[store],
-
-        limit:
-          getLimit(store),
-
-        items:
-          items
+        store: store,
+        storeName: STORES[store],
+        limit: getLimit(store),
+        items: items
       });
 
     } catch (error) {
@@ -344,8 +322,7 @@ app.get(
         .status(500)
         .json({
           ok: false,
-          error:
-            'Ошибка загрузки меню'
+          error: 'Ошибка загрузки меню'
         });
     }
   }
@@ -370,8 +347,7 @@ app.post(
         .status(400)
         .json({
           ok: false,
-          error:
-            'Неизвестная точка'
+          error: 'Неизвестная точка'
         });
     }
 
@@ -397,8 +373,7 @@ app.post(
       '';
 
     if (
-      password !==
-      ADMIN_PASSWORD
+      password !== ADMIN_PASSWORD
     ) {
 
       return res
@@ -445,20 +420,11 @@ app.post(
       );
 
       return res.json({
-
         ok: true,
-
-        message:
-          'Меню сохранено',
-
-        store:
-          store,
-
-        storeName:
-          STORES[store],
-
-        items:
-          saved
+        message: 'Меню сохранено',
+        store: store,
+        storeName: STORES[store],
+        items: saved
       });
 
     } catch (error) {
@@ -482,14 +448,12 @@ app.post(
 // =====================================================
 // ТВ-МЕНЮ ЦУП
 //
-// 14 ПОЗИЦИЙ
-// 7 СЛЕВА + 7 СПРАВА
-//
 // screen=1 -> позиции 1–14
 // screen=2 -> позиции 15–28
 // screen=3 -> позиции 29–42
 //
-// БЕЗ JAVASCRIPT НА ТЕЛЕВИЗОРЕ
+// МЕНЮ ФОРМИРУЕТСЯ НА СЕРВЕРЕ.
+// JAVASCRIPT НА ТЕЛЕВИЗОРЕ НЕ НУЖЕН.
 // =====================================================
 
 app.get(
@@ -519,8 +483,16 @@ app.get(
       screen = 1;
     }
 
-    if (screen > 3) {
-      screen = 3;
+    const maxScreens =
+      Math.max(
+        1,
+        Math.ceil(
+          getLimit(store) / 14
+        )
+      );
+
+    if (screen > maxScreens) {
+      screen = maxScreens;
     }
 
     const allItems =
@@ -576,25 +548,19 @@ app.get(
                 : '';
 
             return (
-
               '<div class="beer-row">' +
 
                 '<div class="beer-name">' +
-
                   escapeHtml(
                     item.name
                   ) +
-
                   badge +
-
                 '</div>' +
 
                 '<div class="beer-price">' +
-
                   escapeHtml(
                     item.price
                   ) +
-
                 '</div>' +
 
               '</div>'
@@ -613,7 +579,6 @@ app.get(
 
     return res.send(
 `<!DOCTYPE html>
-
 <html lang="ru">
 
 <head>
@@ -630,11 +595,391 @@ app.get(
   content="60"
 >
 
-<title>
-ЦУП — Пивное меню
-</title>
+<title>ЦУП — Пивное меню</title>
 
 <style>
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
+
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  background: #000;
+
+  color: #fff;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+.screen {
+
+  position: relative;
+
+  width: 100vw;
+  height: 100vh;
+
+  overflow: hidden;
+
+  background-color: #000;
+
+  background-image:
+    url('/C8B523F6-61F5-4909-8BB9-088AC0BBF9E9.png?v=200');
+
+  background-repeat:
+    no-repeat;
+
+  background-position:
+    center center;
+
+  background-size:
+    100% 100%;
+}
+
+/* =========================================
+   НАЗВАНИЕ МАГАЗИНА
+   ========================================= */
+
+.store-mask {
+
+  position: absolute;
+
+  right: 3.4%;
+
+  top: 2.9%;
+
+  width: 31%;
+
+  height: 8.5%;
+
+  background:
+    rgba(3,7,10,0.94);
+}
+
+.store-name {
+
+  position: absolute;
+
+  right: 4.5%;
+
+  top: 4.4%;
+
+  width: 29%;
+
+  color: #fff;
+
+  text-align: center;
+
+  font-size: 1.65vw;
+
+  font-weight: 900;
+
+  white-space: nowrap;
+}
+
+.store-line {
+
+  position: absolute;
+
+  right: 5%;
+
+  top: 10.1%;
+
+  width: 27%;
+
+  height: 4px;
+
+  background:
+    #ffc629;
+}
+
+/* =========================================
+   МЕНЮ
+   ========================================= */
+
+.menu {
+
+  position: absolute;
+
+  left: 2.5%;
+  right: 2.5%;
+
+  top: 17.4%;
+
+  height: 49.5%;
+}
+
+.column {
+
+  position: absolute;
+
+  top: 0;
+
+  width: 47.3%;
+
+  height: 100%;
+}
+
+.column-left {
+  left: 0;
+}
+
+.column-right {
+  right: 0;
+}
+
+/* =========================================
+   СТРОКА
+   ========================================= */
+
+.beer-row {
+
+  position: relative;
+
+  width: 100%;
+
+  height: 14.2857%;
+}
+
+/* =========================================
+   НАЗВАНИЕ
+   ========================================= */
+
+.beer-name {
+
+  position: absolute;
+
+  left: 8.5%;
+
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+
+  width: 66%;
+
+  color:
+    #ffffff;
+
+  font-size:
+    2.05vw;
+
+  font-weight:
+    900;
+
+  line-height:
+    1;
+
+  white-space:
+    nowrap;
+
+  overflow:
+    hidden;
+
+  text-overflow:
+    ellipsis;
+
+  text-shadow:
+    0 2px 5px
+    rgba(0,0,0,1);
+}
+
+/* =========================================
+   ЦЕНА
+   ========================================= */
+
+.beer-price {
+
+  position: absolute;
+
+  right: 8.5%;
+
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+
+  color:
+    #ffc629;
+
+  font-size:
+    2.8vw;
+
+  font-weight:
+    900;
+
+  line-height:
+    1;
+
+  white-space:
+    nowrap;
+
+  text-align:
+    right;
+
+  text-shadow:
+    0 2px 6px
+    rgba(0,0,0,1);
+}
+
+/* =========================================
+   NEW
+   ========================================= */
+
+.new-badge {
+
+  display:
+    inline-block;
+
+  margin-left:
+    10px;
+
+  padding:
+    3px 8px;
+
+  background:
+    #ffc629;
+
+  color:
+    #050505;
+
+  font-size:
+    0.68vw;
+
+  font-weight:
+    900;
+
+  vertical-align:
+    middle;
+
+  transform:
+    rotate(-4deg);
+}
+
+/* =========================================
+   ЕСЛИ МЕНЮ ПУСТО
+   ========================================= */
+
+.empty {
+
+  position: absolute;
+
+  left: 30%;
+  right: 30%;
+
+  top: 37%;
+
+  padding:
+    22px;
+
+  color:
+    #ffffff;
+
+  background:
+    rgba(0,0,0,0.85);
+
+  border:
+    2px solid #ffc629;
+
+  text-align:
+    center;
+
+  font-size:
+    2.3vw;
+
+  font-weight:
+    900;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="screen">
+
+  <div class="store-mask"></div>
+
+  <div class="store-name">
+    ${escapeHtml(STORES[store])}
+  </div>
+
+  <div class="store-line"></div>
+
+  ${
+    items.length > 0
+      ? `
+        <div class="menu">
+
+          <div class="column column-left">
+            ${makeRows(left)}
+          </div>
+
+          <div class="column column-right">
+            ${makeRows(right)}
+          </div>
+
+        </div>
+      `
+      : `
+        <div class="empty">
+          Меню обновляется
+        </div>
+      `
+  }
+
+</div>
+
+</body>
+
+</html>`
+    );
+  }
+);
+
+// =====================================================
+// ГЛАВНАЯ СТРАНИЦА
+// =====================================================
+
+app.get(
+  '/',
+  function (req, res) {
+
+    return res.sendFile(
+      path.join(
+        __dirname,
+        'public',
+        'index.html'
+      )
+    );
+  }
+);
+
+// =====================================================
+// ЗАПУСК СЕРВЕРА
+// =====================================================
+
+app.listen(
+  PORT,
+  '0.0.0.0',
+  function () {
+
+    console.log(
+      'ЦУП Live Menu запущен на порту ' +
+      PORT
+    );
+  }
+);
