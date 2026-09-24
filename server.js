@@ -5,15 +5,14 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-
-// =====================================================
-// МАГАЗИНЫ
-// =====================================================
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
 const DATA_DIR =
   process.env.DATA_DIR ||
   path.join('/tmp', 'cup-menu-data');
+
+const PUBLIC_DIR =
+  path.join(__dirname, 'public');
 
 const STORES = {
   'leninsk': 'Ленинск-Кузнецкий',
@@ -41,12 +40,12 @@ app.use(
 
 app.use(
   express.static(
-    path.join(__dirname, 'public')
+    PUBLIC_DIR
   )
 );
 
 // =====================================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ФУНКЦИИ
 // =====================================================
 
 function validStore(store) {
@@ -87,62 +86,66 @@ function blankItem() {
   };
 }
 
-function defaultItems(store) {
-  const limit = getLimit(store);
-
-  return Array.from(
-    {
-      length: limit
-    },
-    function () {
-      return blankItem();
-    }
-  );
-}
-
 function normaliseItems(store, items) {
 
+  const limit =
+    getLimit(store);
+
   if (!Array.isArray(items)) {
-    return [];
+    items = [];
   }
 
-  const limit = getLimit(store);
+  const clean =
+    items
+      .slice(0, limit)
+      .map(function (item) {
 
-  return items
-    .slice(0, limit)
-    .map(function (item) {
+        return {
+          name:
+            String(
+              (item && item.name) || ''
+            ).trim(),
 
-      return {
-        name: String(
-          (item && item.name) || ''
-        ).trim(),
+          price:
+            Number(
+              item && item.price
+            ) || 0,
 
-        price:
-          Number(
-            item && item.price
-          ) || 0,
+          available:
+            !item ||
+            item.available !== false,
 
-        available:
-          !item ||
-          item.available !== false,
+          new:
+            !!(
+              item &&
+              item.new === true
+            )
+        };
+      });
 
-        new:
-          !!(
-            item &&
-            item.new === true
-          )
-      };
-    });
+  while (
+    clean.length < limit
+  ) {
+    clean.push(
+      blankItem()
+    );
+  }
+
+  return clean;
 }
 
 function loadStore(store) {
 
   ensureDataDir();
 
-  const file = getFile(store);
+  const file =
+    getFile(store);
 
   if (!fs.existsSync(file)) {
-    return defaultItems(store);
+    return normaliseItems(
+      store,
+      []
+    );
   }
 
   try {
@@ -166,21 +169,10 @@ function loadStore(store) {
               : []
           );
 
-    const result =
-      normaliseItems(
-        store,
-        source
-      );
-
-    const limit = getLimit(store);
-
-    while (result.length < limit) {
-      result.push(
-        blankItem()
-      );
-    }
-
-    return result;
+    return normaliseItems(
+      store,
+      source
+    );
 
   } catch (error) {
 
@@ -189,7 +181,10 @@ function loadStore(store) {
       error
     );
 
-    return defaultItems(store);
+    return normaliseItems(
+      store,
+      []
+    );
   }
 }
 
@@ -197,26 +192,14 @@ function saveStore(store, items) {
 
   ensureDataDir();
 
-  const file =
-    getFile(store);
-
   const clean =
     normaliseItems(
       store,
       items
     );
 
-  while (
-    clean.length <
-    getLimit(store)
-  ) {
-    clean.push(
-      blankItem()
-    );
-  }
-
   fs.writeFileSync(
-    file,
+    getFile(store),
     JSON.stringify(
       {
         items: clean
@@ -233,7 +216,9 @@ function saveStore(store, items) {
 function escapeHtml(value) {
 
   return String(
-    value == null ? '' : value
+    value == null
+      ? ''
+      : value
   )
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -243,7 +228,7 @@ function escapeHtml(value) {
 }
 
 // =====================================================
-// ПРОВЕРКА СЕРВЕРА
+// ПРОВЕРКА
 // =====================================================
 
 app.get(
@@ -258,7 +243,7 @@ app.get(
 );
 
 // =====================================================
-// СПИСОК МАГАЗИНОВ
+// МАГАЗИНЫ
 // =====================================================
 
 app.get(
@@ -294,38 +279,18 @@ app.get(
         });
     }
 
-    try {
+    res.set(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate, max-age=0'
+    );
 
-      const items =
-        loadStore(store);
-
-      res.set(
-        'Cache-Control',
-        'no-store, no-cache, must-revalidate, max-age=0'
-      );
-
-      return res.json({
-        ok: true,
-        store: store,
-        storeName: STORES[store],
-        limit: getLimit(store),
-        items: items
-      });
-
-    } catch (error) {
-
-      console.error(
-        'Ошибка загрузки:',
-        error
-      );
-
-      return res
-        .status(500)
-        .json({
-          ok: false,
-          error: 'Ошибка загрузки меню'
-        });
-    }
+    return res.json({
+      ok: true,
+      store: store,
+      storeName: STORES[store],
+      limit: getLimit(store),
+      items: loadStore(store)
+    });
   }
 );
 
@@ -374,7 +339,8 @@ app.post(
       '';
 
     if (
-      password !== ADMIN_PASSWORD
+      password !==
+      ADMIN_PASSWORD
     ) {
 
       return res
@@ -415,9 +381,11 @@ app.post(
 
       return res.json({
         ok: true,
-        message: 'Меню сохранено',
+        message:
+          'Меню сохранено',
         store: store,
-        storeName: STORES[store],
+        storeName:
+          STORES[store],
         items: saved
       });
 
@@ -441,12 +409,8 @@ app.post(
 
 // =====================================================
 // ТВ-МЕНЮ
-//
-// экран 1 = позиции 1–14
-// экран 2 = позиции 15–28
-// экран 3 = позиции 29–42
-//
-// НИКАКОГО JAVASCRIPT НА ТВ
+// 14 ПОЗИЦИЙ НА ЭКРАН
+// 7 СЛЕВА + 7 СПРАВА
 // =====================================================
 
 app.get(
@@ -484,8 +448,11 @@ app.get(
         )
       );
 
-    if (screen > maxScreens) {
-      screen = maxScreens;
+    if (
+      screen > maxScreens
+    ) {
+      screen =
+        maxScreens;
     }
 
     const allItems =
@@ -542,12 +509,16 @@ app.get(
               '<div class="beer-row">' +
 
                 '<div class="beer-name">' +
-                  escapeHtml(item.name) +
+                  escapeHtml(
+                    item.name
+                  ) +
                   badge +
                 '</div>' +
 
                 '<div class="beer-price">' +
-                  escapeHtml(item.price) +
+                  escapeHtml(
+                    item.price
+                  ) +
                   '<span class="ruble">₽</span>' +
                 '</div>' +
 
@@ -563,7 +534,9 @@ app.get(
       'no-store, no-cache, must-revalidate, max-age=0'
     );
 
-    res.type('html');
+    res.type(
+      'html'
+    );
 
     return res.send(
 `<!DOCTYPE html>
@@ -612,10 +585,9 @@ body {
     sans-serif;
 }
 
-/* ==================================================
-   НОВЫЙ ФОН
-   маленький космонавт, ассортимент поверх картинки
-   ================================================== */
+/* ======================================
+   ФОН
+   ====================================== */
 
 .screen {
 
@@ -629,57 +601,59 @@ body {
   background-color: #000;
 
   background-image:
-    url('/8B5AE0DF-45B3-4244-A904-F2ABFA489704.png?v=1000');
+    url('/8B5AE0DF-45B3-4244-A904-F2ABFA489704.png?v=20260924');
 
-  background-repeat: no-repeat;
+  background-repeat:
+    no-repeat;
 
-  background-position: center center;
+  background-position:
+    center center;
 
-  background-size: 100% 100%;
+  background-size:
+    100% 100%;
 }
 
-/* ==================================================
-   ЛЁГКОЕ ЗАТЕМНЕНИЕ ПОД ТЕКСТОМ
-   картинка остаётся видна
-   ================================================== */
+/* ======================================
+   ЗАТЕМНЕНИЕ ПОД АССОРТИМЕНТОМ
+   ====================================== */
 
 .menu-shade {
 
   position: absolute;
 
-  left: 1.2%;
-  right: 1.2%;
+  left: 0.8%;
+  right: 0.8%;
 
-  top: 13.5%;
+  top: 12.2%;
 
-  height: 64%;
+  height: 68.5%;
 
   background:
-    rgba(0,0,0,0.22);
+    rgba(0,0,0,0.25);
 
   border-radius:
-    16px;
+    18px;
 }
 
-/* ==================================================
-   МЕНЮ ПОЧТИ НА ВЕСЬ ЭКРАН
-   ================================================== */
+/* ======================================
+   МЕНЮ
+   ====================================== */
 
 .menu {
 
   position: absolute;
 
-  left: 2.2%;
-  right: 2.2%;
+  left: 1.3%;
+  right: 1.3%;
 
-  top: 15%;
+  top: 13%;
 
-  height: 61%;
+  height: 67%;
 }
 
-/* ==================================================
+/* ======================================
    ДВЕ КОЛОНКИ
-   ================================================== */
+   ====================================== */
 
 .column {
 
@@ -687,7 +661,7 @@ body {
 
   top: 0;
 
-  width: 48.2%;
+  width: 48.8%;
   height: 100%;
 }
 
@@ -699,9 +673,9 @@ body {
   right: 0;
 }
 
-/* ==================================================
-   ВЕРТИКАЛЬНЫЙ РАЗДЕЛИТЕЛЬ
-   ================================================== */
+/* ======================================
+   ЦЕНТРАЛЬНАЯ ЛИНИЯ
+   ====================================== */
 
 .center-line {
 
@@ -709,22 +683,27 @@ body {
 
   left: 50%;
 
-  top: 16%;
+  top: 14%;
 
-  height: 58%;
+  height: 64%;
 
   width: 3px;
 
   background:
-    rgba(255,198,41,0.85);
+    rgba(
+      255,
+      198,
+      41,
+      0.85
+    );
 
   transform:
     translateX(-50%);
 }
 
-/* ==================================================
-   СТРОКА ПИВА
-   ================================================== */
+/* ======================================
+   СТРОКА
+   ====================================== */
 
 .beer-row {
 
@@ -734,20 +713,28 @@ body {
 
   height: 14.2857%;
 
+  background:
+    rgba(0,0,0,0.30);
+
   border-bottom:
-    1px solid
-    rgba(255,255,255,0.25);
+    2px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.17
+    );
 }
 
-/* ==================================================
-   НАЗВАНИЕ — ОЧЕНЬ КРУПНО
-   ================================================== */
+/* ======================================
+   НАЗВАНИЕ — ЕЩЁ КРУПНЕЕ
+   ====================================== */
 
 .beer-name {
 
   position: absolute;
 
-  left: 2%;
+  left: 1.6%;
 
   top: 50%;
 
@@ -760,7 +747,7 @@ body {
     #ffffff;
 
   font-size:
-    2.55vw;
+    3.4vw;
 
   font-weight:
     900;
@@ -778,13 +765,13 @@ body {
     ellipsis;
 
   text-shadow:
-    0 3px 7px #000,
-    0 1px 2px #000;
+    0 4px 9px #000,
+    0 0 4px #000;
 }
 
-/* ==================================================
+/* ======================================
    ЦЕНА — ЕЩЁ КРУПНЕЕ
-   ================================================== */
+   ====================================== */
 
 .beer-price {
 
@@ -801,7 +788,7 @@ body {
     #ffc629;
 
   font-size:
-    3.25vw;
+    4.2vw;
 
   font-weight:
     900;
@@ -816,21 +803,25 @@ body {
     right;
 
   text-shadow:
-    0 3px 8px #000;
+    0 4px 9px #000,
+    0 0 4px #000;
 }
 
 .ruble {
 
   margin-left:
-    4px;
+    5px;
 
   font-size:
-    1.7vw;
+    2.1vw;
+
+  font-weight:
+    900;
 }
 
-/* ==================================================
+/* ======================================
    NEW
-   ================================================== */
+   ====================================== */
 
 .new-badge {
 
@@ -838,19 +829,19 @@ body {
     inline-block;
 
   margin-left:
-    10px;
+    8px;
 
   padding:
-    3px 8px;
+    3px 7px;
 
   background:
     #ffc629;
 
   color:
-    #050505;
+    #000;
 
   font-size:
-    0.72vw;
+    0.75vw;
 
   font-weight:
     900;
@@ -862,36 +853,37 @@ body {
     rotate(-4deg);
 }
 
-/* ==================================================
-   ЕСЛИ ДАННЫХ НЕТ
-   ================================================== */
+/* ======================================
+   ЕСЛИ МЕНЮ ПУСТО
+   ====================================== */
 
 .empty {
 
   position: absolute;
 
-  left: 30%;
-  right: 30%;
+  left: 28%;
+  right: 28%;
 
   top: 38%;
 
   padding:
-    25px;
+    24px;
 
   background:
-    rgba(0,0,0,0.80);
+    rgba(0,0,0,0.82);
 
   border:
-    2px solid #ffc629;
+    2px solid
+    #ffc629;
 
   color:
-    #ffffff;
+    #fff;
 
   text-align:
     center;
 
   font-size:
-    2.5vw;
+    2.8vw;
 
   font-weight:
     900;
@@ -908,9 +900,11 @@ body {
   ${
     items.length > 0
       ? `
-        <div class="menu-shade"></div>
+        <div class="menu-shade">
+        </div>
 
-        <div class="center-line"></div>
+        <div class="center-line">
+        </div>
 
         <div class="menu">
 
@@ -941,7 +935,7 @@ body {
 );
 
 // =====================================================
-// ГЛАВНАЯ СТРАНИЦА
+// ГЛАВНАЯ
 // =====================================================
 
 app.get(
