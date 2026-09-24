@@ -1,249 +1,753 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ЦУП — Управление меню</title>
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+>
+
+<title>ЦУП — управление меню</title>
 
 <style>
-*{
-  box-sizing:border-box;
+
+* {
+  box-sizing: border-box;
 }
 
-body{
-  margin:0;
-  background:#050505;
-  color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  background: #0b0b0b;
+
+  color: #ffffff;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
 }
 
-.wrap{
-  max-width:1100px;
-  margin:auto;
-  padding:28px 20px 70px;
+body {
+  min-height: 100vh;
 }
 
-.logo{
-  color:#ffc629;
-  font-size:54px;
-  font-weight:900;
-  margin-bottom:5px;
+/* =========================================
+   ШАПКА
+   ========================================= */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  background: #0b0b0b;
+
+  border-bottom:
+    3px solid
+    #ffc629;
+
+  padding:
+    16px 14px 14px;
 }
 
-h1{
-  margin:0 0 25px;
-  font-size:30px;
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
 }
 
-.password{
-  width:100%;
-  padding:18px;
-  font-size:20px;
-  color:#fff;
-  background:#181818;
-  border:3px solid #444;
-  border-radius:15px;
-  margin-bottom:25px;
+.logo {
+  font-size: 25px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.5px;
 }
 
-.screen-title{
-  margin-top:30px;
-  margin-bottom:12px;
-  padding:12px 15px;
-  background:#ffc629;
-  color:#000;
-  font-size:20px;
-  font-weight:900;
-  border-radius:10px;
+.logo span {
+  color: #ffc629;
 }
 
-.header-row,
-.menu-row{
-  display:grid;
-  grid-template-columns:
-    42px
-    minmax(180px,1fr)
-    120px
-    170px
-    70px;
+.subtitle {
+  margin-top: 4px;
 
-  gap:10px;
-  align-items:center;
+  color: #a9a9a9;
+
+  font-size: 12px;
+
+  font-weight: 700;
 }
 
-.header-row{
-  color:#aaa;
-  font-size:15px;
-  margin-bottom:8px;
-  padding:0 5px;
+/* =========================================
+   ОСНОВНОЙ КОНТЕЙНЕР
+   ========================================= */
+
+.container {
+  width: 100%;
+
+  max-width: 1100px;
+
+  margin: 0 auto;
+
+  padding:
+    16px 12px 120px;
 }
 
-.menu-row{
-  margin-bottom:10px;
+/* =========================================
+   БЛОК НАСТРОЕК
+   ========================================= */
+
+.panel {
+  background: #171717;
+
+  border:
+    1px solid
+    #323232;
+
+  border-radius:
+    14px;
+
+  padding:
+    14px;
+
+  margin-bottom:
+    16px;
 }
 
-.number{
-  color:#ffc629;
-  font-weight:900;
-  text-align:center;
+.panel-title {
+  margin-bottom:
+    12px;
+
+  font-size:
+    18px;
+
+  font-weight:
+    900;
 }
 
+.field {
+  margin-bottom:
+    12px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+label {
+  display: block;
+
+  margin-bottom:
+    6px;
+
+  color: #d5d5d5;
+
+  font-size:
+    13px;
+
+  font-weight:
+    800;
+}
+
+select,
 input[type="text"],
 input[type="number"],
-select{
-  width:100%;
-  min-height:54px;
-  background:#181818;
-  border:2px solid #444;
-  border-radius:12px;
-  color:#fff;
-  font-size:18px;
-  padding:10px 12px;
+input[type="password"] {
+  width: 100%;
+
+  min-height: 48px;
+
+  padding:
+    11px 12px;
+
+  border:
+    2px solid
+    #363636;
+
+  border-radius:
+    10px;
+
+  outline: none;
+
+  background: #080808;
+
+  color: #ffffff;
+
+  font-size:
+    17px;
+
+  font-weight:
+    700;
 }
 
-input[type="number"]{
-  text-align:center;
+select:focus,
+input:focus {
+  border-color:
+    #ffc629;
 }
 
-.new-box{
-  display:flex;
-  justify-content:center;
+/* =========================================
+   СТАТУС
+   ========================================= */
+
+.status {
+  display: none;
+
+  margin-top:
+    12px;
+
+  padding:
+    12px;
+
+  border-radius:
+    10px;
+
+  font-size:
+    14px;
+
+  font-weight:
+    800;
 }
 
-input[type="checkbox"]{
-  width:30px;
-  height:30px;
-  accent-color:#ffc629;
+.status.ok {
+  display: block;
+
+  background:
+    rgba(42, 160, 80, 0.18);
+
+  border:
+    1px solid
+    #2aa050;
+
+  color:
+    #8cffad;
 }
 
-.save{
-  width:100%;
-  margin-top:35px;
-  min-height:80px;
-  border:0;
-  border-radius:20px;
-  background:#ffc629;
-  color:#050505;
-  font-size:28px;
-  font-weight:900;
-  cursor:pointer;
+.status.error {
+  display: block;
+
+  background:
+    rgba(185, 45, 45, 0.18);
+
+  border:
+    1px solid
+    #b92d2d;
+
+  color:
+    #ffaaaa;
 }
 
-.save:disabled{
-  opacity:.55;
+.status.info {
+  display: block;
+
+  background:
+    rgba(255, 198, 41, 0.12);
+
+  border:
+    1px solid
+    #ffc629;
+
+  color:
+    #ffc629;
 }
 
-.message{
-  text-align:center;
-  min-height:35px;
-  margin-top:18px;
-  color:#ffc629;
-  font-size:20px;
-  font-weight:700;
+/* =========================================
+   ЭКРАН ТВ
+   ========================================= */
+
+.tv-section {
+  margin-top:
+    22px;
 }
 
-.help{
-  margin-top:25px;
-  padding:18px;
-  background:#111;
-  border-radius:14px;
-  color:#bbb;
-  line-height:1.5;
+.tv-title {
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    10px;
+
+  margin-bottom:
+    10px;
+
+  padding:
+    10px 12px;
+
+  background:
+    #ffc629;
+
+  color:
+    #000;
+
+  border-radius:
+    10px;
+
+  font-size:
+    17px;
+
+  font-weight:
+    900;
 }
 
-.help strong{
-  color:#ffc629;
+.tv-range {
+  font-size:
+    13px;
+
+  font-weight:
+    800;
 }
 
-@media(max-width:700px){
+/* =========================================
+   КАРТОЧКА ПИВА
+   ========================================= */
 
-  .wrap{
-    padding:22px 12px 60px;
+.beer-card {
+  position: relative;
+
+  margin-bottom:
+    10px;
+
+  padding:
+    12px;
+
+  background:
+    #171717;
+
+  border:
+    1px solid
+    #333333;
+
+  border-radius:
+    12px;
+}
+
+.beer-card.hidden-item {
+  opacity: 0.55;
+}
+
+.card-number {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  margin-bottom:
+    10px;
+
+  border-radius:
+    50%;
+
+  background:
+    #ffc629;
+
+  color:
+    #000;
+
+  font-size:
+    14px;
+
+  font-weight:
+    900;
+}
+
+/* =========================================
+   СЕТКА ПОЛЕЙ
+   ========================================= */
+
+.row-main {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    110px
+    100px;
+
+  gap:
+    8px;
+}
+
+.small-label {
+  margin-top:
+    3px;
+
+  color:
+    #888;
+
+  font-size:
+    11px;
+
+  font-weight:
+    700;
+}
+
+/* =========================================
+   ПЕРЕКЛЮЧАТЕЛИ
+   ========================================= */
+
+.switches {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap:
+    8px;
+
+  margin-top:
+    11px;
+}
+
+.switch-box {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  gap:
+    7px;
+
+  min-height:
+    40px;
+
+  padding:
+    7px 10px;
+
+  background:
+    #0c0c0c;
+
+  border:
+    1px solid
+    #383838;
+
+  border-radius:
+    9px;
+
+  color:
+    #ffffff;
+
+  font-size:
+    13px;
+
+  font-weight:
+    800;
+
+  cursor:
+    pointer;
+}
+
+.switch-box input {
+  width:
+    20px;
+
+  height:
+    20px;
+
+  accent-color:
+    #ffc629;
+}
+
+.switch-new {
+  color:
+    #ffc629;
+}
+
+.switch-soon {
+  color:
+    #ffc629;
+}
+
+/* =========================================
+   НИЖНЯЯ ПАНЕЛЬ
+   ========================================= */
+
+.save-bar {
+  position: fixed;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 2000;
+
+  padding:
+    12px;
+
+  background:
+    rgba(
+      11,
+      11,
+      11,
+      0.96
+    );
+
+  border-top:
+    2px solid
+    #ffc629;
+}
+
+.save-inner {
+  width: 100%;
+
+  max-width:
+    1100px;
+
+  margin:
+    0 auto;
+
+  display:
+    flex;
+
+  gap:
+    10px;
+}
+
+button {
+  min-height:
+    52px;
+
+  padding:
+    10px 16px;
+
+  border:
+    none;
+
+  border-radius:
+    11px;
+
+  font-size:
+    16px;
+
+  font-weight:
+    900;
+
+  cursor:
+    pointer;
+}
+
+.btn-save {
+  flex: 1;
+
+  background:
+    #ffc629;
+
+  color:
+    #000;
+}
+
+.btn-save:disabled {
+  opacity:
+    0.5;
+}
+
+.btn-reload {
+  width:
+    60px;
+
+  background:
+    #292929;
+
+  color:
+    #fff;
+}
+
+/* =========================================
+   ЗАГРУЗКА
+   ========================================= */
+
+.loading {
+  padding:
+    30px 10px;
+
+  text-align:
+    center;
+
+  color:
+    #ffc629;
+
+  font-size:
+    18px;
+
+  font-weight:
+    900;
+}
+
+/* =========================================
+   МОБИЛЬНЫЙ
+   ========================================= */
+
+@media (
+  max-width: 700px
+) {
+
+  .logo {
+    font-size:
+      22px;
   }
 
-  .logo{
-    font-size:45px;
+  .container {
+    padding-left:
+      8px;
+
+    padding-right:
+      8px;
   }
 
-  h1{
-    font-size:24px;
-  }
-
-  .header-row,
-  .menu-row{
+  .row-main {
     grid-template-columns:
-      30px
-      minmax(120px,1fr)
-      70px
-      115px
-      48px;
-
-    gap:6px;
+      minmax(0, 1fr)
+      88px;
   }
 
+  .abv-field {
+    grid-column:
+      1 / -1;
+  }
+
+  .beer-card {
+    padding:
+      10px;
+  }
+
+  select,
   input[type="text"],
   input[type="number"],
-  select{
-    font-size:15px;
-    padding:8px;
-    min-height:48px;
+  input[type="password"] {
+    font-size:
+      16px;
   }
 
-  .header-row{
-    font-size:12px;
-  }
-
-  input[type="checkbox"]{
-    width:27px;
-    height:27px;
-  }
-
-  .save{
-    font-size:24px;
-  }
 }
+
 </style>
+
 </head>
 
 <body>
 
-<div class="wrap">
+<!-- ======================================
+     ШАПКА
+     ====================================== -->
 
-  <div class="logo">ЦУП</div>
+<div class="header">
 
-  <h1 id="title">
-    Управление меню
-  </h1>
+  <div class="header-top">
 
-  <input
-    id="password"
-    class="password"
-    type="password"
-    placeholder="Пароль администратора"
-    autocomplete="current-password"
-  >
+    <div>
 
-  <div id="rows"></div>
+      <div class="logo">
+        ЦУП <span>LIVE MENU</span>
+      </div>
 
-  <button
-    id="saveButton"
-    class="save"
-    type="button"
-  >
-    СОХРАНИТЬ МЕНЮ
-  </button>
+      <div class="subtitle">
+        Управление пивным меню
+      </div>
 
-  <div
-    id="message"
-    class="message"
-  ></div>
+    </div>
 
-  <div class="help">
-    <strong>Три телевизора:</strong><br>
-    Экран №1 — позиции 1–14<br>
-    Экран №2 — позиции 15–28<br>
-    Экран №3 — позиции 29–42
+  </div>
+
+</div>
+
+
+<!-- ======================================
+     КОНТЕНТ
+     ====================================== -->
+
+<div class="container">
+
+  <div class="panel">
+
+    <div class="panel-title">
+      Управление меню
+    </div>
+
+    <div class="field">
+
+      <label for="storeSelect">
+        Точка
+      </label>
+
+      <select id="storeSelect">
+      </select>
+
+    </div>
+
+    <div class="field">
+
+      <label for="password">
+        Пароль администратора
+      </label>
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Введите пароль"
+        autocomplete="current-password"
+      >
+
+    </div>
+
+    <div
+      id="status"
+      class="status"
+    >
+    </div>
+
+  </div>
+
+
+  <div id="menuArea">
+
+    <div class="loading">
+      Загружаю меню...
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ======================================
+     КНОПКИ
+     ====================================== -->
+
+<div class="save-bar">
+
+  <div class="save-inner">
+
+    <button
+      id="reloadButton"
+      class="btn-reload"
+      type="button"
+      title="Обновить"
+    >
+      ↻
+    </button>
+
+    <button
+      id="saveButton"
+      class="btn-save"
+      type="button"
+    >
+      СОХРАНИТЬ МЕНЮ
+    </button>
+
   </div>
 
 </div>
@@ -251,512 +755,790 @@ input[type="checkbox"]{
 
 <script>
 
-const params =
-  new URLSearchParams(
-    window.location.search
+/* =========================================
+   ПЕРЕМЕННЫЕ
+   ========================================= */
+
+const storeSelect =
+  document.getElementById(
+    'storeSelect'
   );
 
-const store =
-  params.get("store") ||
-  "yurga-stroitelnaya";
+const passwordInput =
+  document.getElementById(
+    'password'
+  );
 
-const TOTAL_ITEMS = 42;
-const ITEMS_PER_SCREEN = 14;
+const menuArea =
+  document.getElementById(
+    'menuArea'
+  );
 
-
-const rowsElement =
-  document.getElementById("rows");
-
-const titleElement =
-  document.getElementById("title");
-
-const passwordElement =
-  document.getElementById("password");
+const statusBox =
+  document.getElementById(
+    'status'
+  );
 
 const saveButton =
-  document.getElementById("saveButton");
+  document.getElementById(
+    'saveButton'
+  );
 
-const messageElement =
-  document.getElementById("message");
+const reloadButton =
+  document.getElementById(
+    'reloadButton'
+  );
+
+let currentItems = [];
+
+let currentLimit = 18;
 
 
-function blankItem(){
+/* =========================================
+   СТАТУС
+   ========================================= */
 
-  return {
-    name:"",
-    price:0,
-    available:true,
-    new:false
-  };
+function showStatus(
+  text,
+  type
+) {
 
+  statusBox.className =
+    'status ' +
+    (type || 'info');
+
+  statusBox.textContent =
+    text;
+}
+
+function hideStatus() {
+
+  statusBox.className =
+    'status';
+
+  statusBox.textContent =
+    '';
 }
 
 
-function createRows(items){
+/* =========================================
+   БЕЗОПАСНЫЙ HTML
+   ========================================= */
 
-  rowsElement.innerHTML = "";
+function escapeHtml(value) {
 
-  for(
-    let screen = 1;
-    screen <= 3;
-    screen++
-  ){
-
-    const title =
-      document.createElement("div");
-
-    title.className =
-      "screen-title";
-
-    const start =
-      (screen - 1) *
-      ITEMS_PER_SCREEN + 1;
-
-    const end =
-      screen *
-      ITEMS_PER_SCREEN;
-
-    title.textContent =
-      "ТЕЛЕВИЗОР №" +
-      screen +
-      " — позиции " +
-      start +
-      "–" +
-      end;
-
-    rowsElement.appendChild(title);
-
-
-    const header =
-      document.createElement("div");
-
-    header.className =
-      "header-row";
-
-    header.innerHTML =
-      "<div>№</div>" +
-      "<div>Название</div>" +
-      "<div>Цена</div>" +
-      "<div>Статус</div>" +
-      "<div>NEW</div>";
-
-    rowsElement.appendChild(header);
+  return String(
+    value == null
+      ? ''
+      : value
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+}
 
 
-    for(
-      let i = start - 1;
-      i < end;
-      i++
-    ){
+/* =========================================
+   ЗАГРУЗКА СПИСКА ТОЧЕК
+   ========================================= */
 
-      const item =
-        items[i] ||
-        blankItem();
+async function loadStores() {
 
-      const row =
-        document.createElement("div");
+  try {
 
-      row.className =
-        "menu-row";
+    const response =
+      await fetch(
+        '/api/stores',
+        {
+          cache:
+            'no-store'
+        }
+      );
 
-      row.dataset.index = i;
-
-
-      const number =
-        document.createElement("div");
-
-      number.className =
-        "number";
-
-      number.textContent =
-        i + 1;
-
-
-      const name =
-        document.createElement("input");
-
-      name.type =
-        "text";
-
-      name.className =
-        "item-name";
-
-      name.placeholder =
-        "Название пива";
-
-      name.value =
-        item.name || "";
-
-
-      const price =
-        document.createElement("input");
-
-      price.type =
-        "number";
-
-      price.className =
-        "item-price";
-
-      price.min =
-        "0";
-
-      price.step =
-        "1";
-
-      price.value =
-        Number(item.price) || 0;
-
-
-      const available =
-        document.createElement("select");
-
-      available.className =
-        "item-available";
-
-      const yes =
-        document.createElement("option");
-
-      yes.value =
-        "true";
-
-      yes.textContent =
-        "В наличии";
-
-
-      const no =
-        document.createElement("option");
-
-      no.value =
-        "false";
-
-      no.textContent =
-        "Скрыть";
-
-
-      available.appendChild(yes);
-      available.appendChild(no);
-
-      available.value =
-        item.available === false
-          ? "false"
-          : "true";
-
-
-      const newBox =
-        document.createElement("div");
-
-      newBox.className =
-        "new-box";
-
-
-      const isNew =
-        document.createElement("input");
-
-      isNew.type =
-        "checkbox";
-
-      isNew.className =
-        "item-new";
-
-      isNew.checked =
-        item.new === true;
-
-
-      newBox.appendChild(isNew);
-
-
-      row.appendChild(number);
-      row.appendChild(name);
-      row.appendChild(price);
-      row.appendChild(available);
-      row.appendChild(newBox);
-
-
-      rowsElement.appendChild(row);
+    if (!response.ok) {
+      throw new Error(
+        'Ошибка загрузки точек'
+      );
     }
+
+    const stores =
+      await response.json();
+
+    storeSelect.innerHTML =
+      '';
+
+    Object.keys(
+      stores
+    ).forEach(
+      function (key) {
+
+        const option =
+          document.createElement(
+            'option'
+          );
+
+        option.value =
+          key;
+
+        option.textContent =
+          stores[key];
+
+        storeSelect.appendChild(
+          option
+        );
+      }
+    );
+
+    const savedStore =
+      localStorage.getItem(
+        'cup-admin-store'
+      );
+
+    if (
+      savedStore &&
+      stores[savedStore]
+    ) {
+
+      storeSelect.value =
+        savedStore;
+
+    } else if (
+      stores[
+        'yurga-stroitelnaya'
+      ]
+    ) {
+
+      storeSelect.value =
+        'yurga-stroitelnaya';
+    }
+
+    await loadMenu();
+
+  } catch (error) {
+
+    showStatus(
+      'Не удалось загрузить список точек.',
+      'error'
+    );
   }
 }
 
 
-function collectItems(){
+/* =========================================
+   ЗАГРУЗКА МЕНЮ
+   ========================================= */
 
-  const rows =
-    document.querySelectorAll(
-      ".menu-row"
-    );
+async function loadMenu() {
 
-  const items = [];
+  hideStatus();
 
+  const store =
+    storeSelect.value;
 
-  rows.forEach(row => {
+  if (!store) {
+    return;
+  }
 
-    const name =
-      row.querySelector(
-        ".item-name"
-      ).value.trim();
+  localStorage.setItem(
+    'cup-admin-store',
+    store
+  );
 
+  menuArea.innerHTML =
+    '<div class="loading">Загружаю меню...</div>';
 
-    const price =
-      Number(
-        row.querySelector(
-          ".item-price"
-        ).value
-      ) || 0;
-
-
-    const available =
-      row.querySelector(
-        ".item-available"
-      ).value === "true";
-
-
-    const isNew =
-      row.querySelector(
-        ".item-new"
-      ).checked;
-
-
-    items.push({
-      name,
-      price,
-      available,
-      new:isNew
-    });
-
-  });
-
-
-  return items;
-}
-
-
-async function loadMenu(){
-
-  messageElement.textContent =
-    "Загрузка меню...";
-
-
-  try{
+  try {
 
     const response =
       await fetch(
-        "/api/menu?store=" +
-        encodeURIComponent(store) +
-        "&t=" +
+        '/api/menu?store=' +
+        encodeURIComponent(
+          store
+        ) +
+        '&t=' +
         Date.now(),
         {
-          cache:"no-store"
+          cache:
+            'no-store'
         }
       );
-
-
-    if(!response.ok){
-
-      let errorText =
-        "Ошибка загрузки";
-
-      try{
-
-        const errorData =
-          await response.json();
-
-        errorText =
-          errorData.error ||
-          errorText;
-
-      }catch(e){}
-
-
-      throw new Error(
-        errorText
-      );
-    }
-
 
     const data =
       await response.json();
 
+    if (
+      !response.ok ||
+      !data.ok
+    ) {
 
-    titleElement.textContent =
-      "Управление: " +
-      (
-        data.storeName ||
-        store
+      throw new Error(
+        data.error ||
+        'Ошибка загрузки меню'
       );
+    }
 
+    currentLimit =
+      Number(
+        data.limit
+      ) || 18;
 
-    let items =
-      Array.isArray(data.items)
+    currentItems =
+      Array.isArray(
+        data.items
+      )
         ? data.items
         : [];
 
+    while (
+      currentItems.length <
+      currentLimit
+    ) {
 
-    while(
-      items.length <
-      TOTAL_ITEMS
-    ){
-
-      items.push(
-        blankItem()
-      );
-
+      currentItems.push({
+        name: '',
+        price: 0,
+        abv: '',
+        available: true,
+        new: false,
+        soon: false
+      });
     }
 
+    renderMenu();
 
-    items =
-      items.slice(
-        0,
-        TOTAL_ITEMS
-      );
+  } catch (error) {
 
+    menuArea.innerHTML =
+      '';
 
-    createRows(items);
-
-
-    messageElement.textContent =
-      "";
-
-  }
-  catch(error){
-
-    console.error(error);
-
-    createRows([]);
-
-    messageElement.textContent =
-      "Не удалось загрузить меню: " +
-      error.message;
+    showStatus(
+      error.message ||
+      'Ошибка загрузки меню.',
+      'error'
+    );
   }
 }
 
 
-async function saveMenu(){
+/* =========================================
+   ОДНА КАРТОЧКА
+   ========================================= */
+
+function createCard(
+  item,
+  index
+) {
+
+  const card =
+    document.createElement(
+      'div'
+    );
+
+  card.className =
+    'beer-card' +
+    (
+      item.available === false
+        ? ' hidden-item'
+        : ''
+    );
+
+  card.dataset.index =
+    index;
+
+  const number =
+    index + 1;
+
+  card.innerHTML =
+`
+<div class="card-number">
+  ${number}
+</div>
+
+<div class="row-main">
+
+  <div>
+
+    <label>
+      Название пива
+    </label>
+
+    <input
+      type="text"
+      class="beer-name-input"
+      value="${escapeHtml(
+        item.name || ''
+      )}"
+      placeholder="Например: Жигулевское"
+    >
+
+  </div>
+
+
+  <div>
+
+    <label>
+      Цена
+    </label>
+
+    <input
+      type="number"
+      class="beer-price-input"
+      value="${
+        item.price || ''
+      }"
+      min="0"
+      inputmode="decimal"
+      placeholder="200"
+    >
+
+  </div>
+
+
+  <div class="abv-field">
+
+    <label>
+      Алкоголь %
+    </label>
+
+    <input
+      type="text"
+      class="beer-abv-input"
+      value="${escapeHtml(
+        item.abv || ''
+      )}"
+      inputmode="decimal"
+      placeholder="4.5"
+    >
+
+  </div>
+
+</div>
+
+
+<div class="switches">
+
+  <label class="switch-box">
+
+    <input
+      type="checkbox"
+      class="beer-available-input"
+      ${
+        item.available !== false
+          ? 'checked'
+          : ''
+      }
+    >
+
+    Показывать
+
+  </label>
+
+
+  <label class="switch-box switch-new">
+
+    <input
+      type="checkbox"
+      class="beer-new-input"
+      ${
+        item.new === true
+          ? 'checked'
+          : ''
+      }
+    >
+
+    NEW
+
+  </label>
+
+
+  <label class="switch-box switch-soon">
+
+    <input
+      type="checkbox"
+      class="beer-soon-input"
+      ${
+        item.soon === true
+          ? 'checked'
+          : ''
+      }
+    >
+
+    Скоро подвезут
+
+  </label>
+
+</div>
+`;
+
+  const availableInput =
+    card.querySelector(
+      '.beer-available-input'
+    );
+
+  availableInput.addEventListener(
+    'change',
+    function () {
+
+      if (
+        availableInput.checked
+      ) {
+
+        card.classList.remove(
+          'hidden-item'
+        );
+
+      } else {
+
+        card.classList.add(
+          'hidden-item'
+        );
+      }
+    }
+  );
+
+  return card;
+}
+
+
+/* =========================================
+   ОТРИСОВКА ВСЕГО МЕНЮ
+   ========================================= */
+
+function renderMenu() {
+
+  menuArea.innerHTML =
+    '';
+
+  const itemsPerScreen =
+    18;
+
+  const screenCount =
+    Math.ceil(
+      currentLimit /
+      itemsPerScreen
+    );
+
+  for (
+    let screen = 0;
+    screen < screenCount;
+    screen++
+  ) {
+
+    const section =
+      document.createElement(
+        'div'
+      );
+
+    section.className =
+      'tv-section';
+
+    const start =
+      screen *
+      itemsPerScreen;
+
+    const end =
+      Math.min(
+        start +
+        itemsPerScreen,
+        currentLimit
+      );
+
+    const title =
+      document.createElement(
+        'div'
+      );
+
+    title.className =
+      'tv-title';
+
+    title.innerHTML =
+`
+<span>
+  ТВ ${screen + 1}
+</span>
+
+<span class="tv-range">
+  позиции ${start + 1}–${end}
+</span>
+`;
+
+    section.appendChild(
+      title
+    );
+
+    for (
+      let i = start;
+      i < end;
+      i++
+    ) {
+
+      const item =
+        currentItems[i] || {
+          name: '',
+          price: 0,
+          abv: '',
+          available: true,
+          new: false,
+          soon: false
+        };
+
+      section.appendChild(
+        createCard(
+          item,
+          i
+        )
+      );
+    }
+
+    menuArea.appendChild(
+      section
+    );
+  }
+}
+
+
+/* =========================================
+   СОБРАТЬ ДАННЫЕ ИЗ ФОРМЫ
+   ========================================= */
+
+function collectItems() {
+
+  const cards =
+    menuArea.querySelectorAll(
+      '.beer-card'
+    );
+
+  const result =
+    [];
+
+  cards.forEach(
+    function (card) {
+
+      const name =
+        card
+          .querySelector(
+            '.beer-name-input'
+          )
+          .value
+          .trim();
+
+      const priceValue =
+        card
+          .querySelector(
+            '.beer-price-input'
+          )
+          .value;
+
+      const abv =
+        card
+          .querySelector(
+            '.beer-abv-input'
+          )
+          .value
+          .replace(
+            '%',
+            ''
+          )
+          .trim();
+
+      const available =
+        card
+          .querySelector(
+            '.beer-available-input'
+          )
+          .checked;
+
+      const isNew =
+        card
+          .querySelector(
+            '.beer-new-input'
+          )
+          .checked;
+
+      const soon =
+        card
+          .querySelector(
+            '.beer-soon-input'
+          )
+          .checked;
+
+      result.push({
+        name:
+          name,
+
+        price:
+          Number(
+            priceValue
+          ) || 0,
+
+        abv:
+          abv,
+
+        available:
+          available,
+
+        new:
+          isNew,
+
+        soon:
+          soon
+      });
+    }
+  );
+
+  return result;
+}
+
+
+/* =========================================
+   СОХРАНЕНИЕ
+   ========================================= */
+
+async function saveMenu() {
+
+  hideStatus();
+
+  const store =
+    storeSelect.value;
 
   const password =
-    passwordElement.value;
+    passwordInput.value;
 
+  if (!password) {
 
-  if(!password){
+    showStatus(
+      'Введите пароль администратора.',
+      'error'
+    );
 
-    messageElement.textContent =
-      "Введите пароль администратора";
-
-    passwordElement.focus();
+    passwordInput.focus();
 
     return;
   }
 
-
   const items =
     collectItems();
-
 
   saveButton.disabled =
     true;
 
   saveButton.textContent =
-    "СОХРАНЯЕМ...";
+    'СОХРАНЯЮ...';
 
-  messageElement.textContent =
-    "Сохранение...";
-
-
-  try{
+  try {
 
     const response =
       await fetch(
-        "/api/menu?store=" +
-        encodeURIComponent(store),
+        '/api/menu?store=' +
+        encodeURIComponent(
+          store
+        ),
         {
-          method:"POST",
+          method:
+            'POST',
 
-          headers:{
-            "Content-Type":
-              "application/json",
+          headers: {
+            'Content-Type':
+              'application/json',
 
-            "x-admin-password":
+            'x-admin-password':
               password
           },
 
-          body:JSON.stringify({
-            items
-          })
+          body:
+            JSON.stringify({
+              items:
+                items
+            })
         }
       );
 
+    const data =
+      await response.json();
 
-    let data = {};
-
-    try{
-
-      data =
-        await response.json();
-
-    }catch(e){}
-
-
-    if(!response.ok){
+    if (
+      !response.ok ||
+      !data.ok
+    ) {
 
       throw new Error(
         data.error ||
-        (
-          "Ошибка сервера " +
-          response.status
-        )
+        'Ошибка сохранения'
       );
     }
 
-
-    messageElement.textContent =
-      "✓ МЕНЮ СОХРАНЕНО";
-
-
-    setTimeout(
-      () => {
-
-        if(
-          messageElement.textContent ===
-          "✓ МЕНЮ СОХРАНЕНО"
-        ){
-
-          messageElement.textContent =
-            "";
-        }
-
-      },
-      5000
+    showStatus(
+      '✓ Меню сохранено. Телевизоры обновятся автоматически.',
+      'ok'
     );
 
-  }
-  catch(error){
+    currentItems =
+      data.items;
 
-    console.error(error);
+  } catch (error) {
 
-    messageElement.textContent =
-      "Ошибка сохранения: " +
-      error.message;
+    showStatus(
+      error.message ||
+      'Не удалось сохранить меню.',
+      'error'
+    );
 
-  }
-  finally{
+  } finally {
 
     saveButton.disabled =
       false;
 
     saveButton.textContent =
-      "СОХРАНИТЬ МЕНЮ";
+      'СОХРАНИТЬ МЕНЮ';
   }
 }
 
 
+/* =========================================
+   СОБЫТИЯ
+   ========================================= */
+
+storeSelect.addEventListener(
+  'change',
+  loadMenu
+);
+
 saveButton.addEventListener(
-  "click",
+  'click',
   saveMenu
 );
 
+reloadButton.addEventListener(
+  'click',
+  loadMenu
+);
 
-loadMenu();
+
+/* =========================================
+   ЗАПУСК
+   ========================================= */
+
+loadStores();
 
 </script>
 
 </body>
+
 </html>
