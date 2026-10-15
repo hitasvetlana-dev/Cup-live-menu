@@ -3,16 +3,15 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
+const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const DATA_DIR =
   process.env.DATA_DIR ||
   path.join('/tmp', 'cup-menu-data');
-
-const PUBLIC_DIR =
-  path.join(__dirname, 'public');
 
 const STORES = {
   'leninsk': 'Ленинск-Кузнецкий',
@@ -24,137 +23,108 @@ const STORES = {
 };
 
 const STORE_LIMITS = {
-  'leninsk': 14,
-  'yurga-stroitelnaya': 42,
-  'yurga-kirpichnaya': 14,
-  'taiga': 14,
-  'yashkino': 14,
-  'luna': 14
+  'leninsk': 18,
+  'yurga-stroitelnaya': 54,
+  'yurga-kirpichnaya': 18,
+  'taiga': 18,
+  'yashkino': 18,
+  'luna': 18
 };
 
-app.use(
-  express.json({
-    limit: '1mb'
-  })
-);
-
-app.use(
-  express.static(
-    PUBLIC_DIR
-  )
-);
-
-// =====================================================
-// ФУНКЦИИ
-// =====================================================
+app.use(express.json({ limit: '1mb' }));
+app.use(express.static(PUBLIC_DIR));
 
 function validStore(store) {
-  return Object.prototype.hasOwnProperty.call(
-    STORES,
-    store
-  );
+  return Object.prototype.hasOwnProperty.call(STORES, store);
 }
 
 function getLimit(store) {
-  return STORE_LIMITS[store] || 14;
+  return STORE_LIMITS[store] || 18;
 }
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(
-      DATA_DIR,
-      {
-        recursive: true
-      }
-    );
+    fs.mkdirSync(DATA_DIR, { recursive: true });
   }
 }
 
 function getFile(store) {
-  return path.join(
-    DATA_DIR,
-    store + '.json'
-  );
+  return path.join(DATA_DIR, store + '.json');
 }
 
 function blankItem() {
   return {
     name: '',
     price: 0,
+    abv: '',
     available: true,
-    new: false
+    new: false,
+    soon: false
   };
 }
 
 function normaliseItems(store, items) {
-
-  const limit =
-    getLimit(store);
-
   if (!Array.isArray(items)) {
     items = [];
   }
 
-  const clean =
-    items
-      .slice(0, limit)
-      .map(function (item) {
+  const limit = getLimit(store);
 
-        return {
-          name:
-            String(
-              (item && item.name) || ''
-            ).trim(),
+  const clean = items
+    .slice(0, limit)
+    .map(function (item) {
+      return {
+        name: String(
+          (item && item.name) || ''
+        ).trim(),
 
-          price:
-            Number(
-              item && item.price
-            ) || 0,
+        price: Number(
+          item && item.price
+        ) || 0,
 
-          available:
-            !item ||
-            item.available !== false,
+        abv: String(
+          (item && item.abv) || ''
+        )
+          .replace('%', '')
+          .trim(),
 
-          new:
-            !!(
-              item &&
-              item.new === true
-            )
-        };
-      });
+        available:
+          !item ||
+          item.available !== false,
 
-  while (
-    clean.length < limit
-  ) {
-    clean.push(
-      blankItem()
-    );
+        new:
+          !!(
+            item &&
+            item.new === true
+          ),
+
+        soon:
+          !!(
+            item &&
+            item.soon === true
+          )
+      };
+    });
+
+  while (clean.length < limit) {
+    clean.push(blankItem());
   }
 
   return clean;
 }
 
 function loadStore(store) {
-
   ensureDataDir();
 
-  const file =
-    getFile(store);
+  const file = getFile(store);
 
   if (!fs.existsSync(file)) {
-    return normaliseItems(
-      store,
-      []
-    );
+    return normaliseItems(store, []);
   }
 
   try {
-
     const raw =
-      fs.readFileSync(
-        file,
-        'utf8'
-      );
+      fs.readFileSync(file, 'utf8');
 
     const data =
       JSON.parse(raw);
@@ -175,7 +145,6 @@ function loadStore(store) {
     );
 
   } catch (error) {
-
     console.error(
       'Ошибка чтения меню:',
       error
@@ -189,7 +158,6 @@ function loadStore(store) {
 }
 
 function saveStore(store, items) {
-
   ensureDataDir();
 
   const clean =
@@ -201,9 +169,7 @@ function saveStore(store, items) {
   fs.writeFileSync(
     getFile(store),
     JSON.stringify(
-      {
-        items: clean
-      },
+      { items: clean },
       null,
       2
     ),
@@ -214,11 +180,8 @@ function saveStore(store, items) {
 }
 
 function escapeHtml(value) {
-
   return String(
-    value == null
-      ? ''
-      : value
+    value == null ? '' : value
   )
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -227,14 +190,13 @@ function escapeHtml(value) {
     .replace(/'/g, '&#039;');
 }
 
-// =====================================================
-// ПРОВЕРКА
-// =====================================================
+/* =========================
+   ПРОВЕРКА
+   ========================= */
 
 app.get(
   '/api/health',
   function (req, res) {
-
     return res.json({
       ok: true,
       service: 'ЦУП Live Menu'
@@ -242,23 +204,20 @@ app.get(
   }
 );
 
-// =====================================================
-// МАГАЗИНЫ
-// =====================================================
+/* =========================
+   СПИСОК ТОЧЕК
+   ========================= */
 
 app.get(
   '/api/stores',
   function (req, res) {
-
-    return res.json(
-      STORES
-    );
+    return res.json(STORES);
   }
 );
 
-// =====================================================
-// ПОЛУЧИТЬ МЕНЮ
-// =====================================================
+/* =========================
+   ПОЛУЧИТЬ МЕНЮ
+   ========================= */
 
 app.get(
   '/api/menu',
@@ -270,7 +229,6 @@ app.get(
       );
 
     if (!validStore(store)) {
-
       return res
         .status(400)
         .json({
@@ -294,9 +252,9 @@ app.get(
   }
 );
 
-// =====================================================
-// СОХРАНИТЬ МЕНЮ
-// =====================================================
+/* =========================
+   СОХРАНИТЬ МЕНЮ
+   ========================= */
 
 app.post(
   '/api/menu',
@@ -308,7 +266,6 @@ app.post(
       );
 
     if (!validStore(store)) {
-
       return res
         .status(400)
         .json({
@@ -318,7 +275,6 @@ app.post(
     }
 
     if (!ADMIN_PASSWORD) {
-
       return res
         .status(500)
         .json({
@@ -329,20 +285,14 @@ app.post(
     }
 
     const password =
-      req.get(
-        'x-admin-password'
-      ) ||
+      req.get('x-admin-password') ||
       (
         req.body &&
         req.body.password
       ) ||
       '';
 
-    if (
-      password !==
-      ADMIN_PASSWORD
-    ) {
-
+    if (password !== ADMIN_PASSWORD) {
       return res
         .status(401)
         .json({
@@ -361,7 +311,6 @@ app.post(
           );
 
     if (!Array.isArray(items)) {
-
       return res
         .status(400)
         .json({
@@ -372,7 +321,6 @@ app.post(
     }
 
     try {
-
       const saved =
         saveStore(
           store,
@@ -384,13 +332,11 @@ app.post(
         message:
           'Меню сохранено',
         store: store,
-        storeName:
-          STORES[store],
+        storeName: STORES[store],
         items: saved
       });
 
     } catch (error) {
-
       console.error(
         'Ошибка сохранения:',
         error
@@ -401,17 +347,21 @@ app.post(
         .json({
           ok: false,
           error:
-            'Сервер не смог сохранить меню'
+            'Не удалось сохранить меню'
         });
     }
   }
 );
 
-// =====================================================
-// ТВ-МЕНЮ
-// 14 ПОЗИЦИЙ НА ЭКРАН
-// 7 СЛЕВА + 7 СПРАВА
-// =====================================================
+/* =========================
+   ТВ МЕНЮ
+
+   ТВ 1 = 1–18
+   ТВ 2 = 19–36
+   ТВ 3 = 37–54
+
+   9 слева + 9 справа
+   ========================= */
 
 app.get(
   '/tv',
@@ -433,44 +383,28 @@ app.get(
         10
       );
 
-    if (
-      !screen ||
-      screen < 1
-    ) {
+    if (!screen || screen < 1) {
       screen = 1;
     }
+
+    const ITEMS_PER_SCREEN = 18;
+    const ITEMS_PER_COLUMN = 9;
 
     const maxScreens =
       Math.max(
         1,
         Math.ceil(
-          getLimit(store) / 14
+          getLimit(store) /
+          ITEMS_PER_SCREEN
         )
       );
 
-    if (
-      screen > maxScreens
-    ) {
-      screen =
-        maxScreens;
+    if (screen > maxScreens) {
+      screen = maxScreens;
     }
 
     const allItems =
-      loadStore(store)
-        .filter(
-          function (item) {
-
-            return (
-              item &&
-              item.available !== false &&
-              String(
-                item.name || ''
-              ).trim() !== ''
-            );
-          }
-        );
-
-    const ITEMS_PER_SCREEN = 14;
+      loadStore(store);
 
     const start =
       (screen - 1) *
@@ -482,50 +416,83 @@ app.get(
         start + ITEMS_PER_SCREEN
       );
 
+    while (
+      items.length <
+      ITEMS_PER_SCREEN
+    ) {
+      items.push(
+        blankItem()
+      );
+    }
+
     const left =
       items.slice(
         0,
-        7
+        ITEMS_PER_COLUMN
       );
 
     const right =
       items.slice(
-        7,
-        14
+        ITEMS_PER_COLUMN,
+        ITEMS_PER_SCREEN
       );
 
     function makeRows(list) {
-
       return list
-        .map(
-          function (item) {
+        .map(function (item) {
 
-            const badge =
-              item.new === true
-                ? '<span class="new-badge">NEW</span>'
-                : '';
+          const visible =
+            item &&
+            item.available !== false &&
+            String(
+              item.name || ''
+            ).trim() !== '';
 
+          if (!visible) {
             return (
-              '<div class="beer-row">' +
-
-                '<div class="beer-name">' +
-                  escapeHtml(
-                    item.name
-                  ) +
-                  badge +
-                '</div>' +
-
-                '<div class="beer-price">' +
-                  escapeHtml(
-                    item.price
-                  ) +
-                  '<span class="ruble">₽</span>' +
-                '</div>' +
-
-              '</div>'
+              '<div class="beer-row empty-row"></div>'
             );
           }
-        )
+
+          let badge = '';
+
+          if (item.soon === true) {
+            badge =
+              '<span class="soon-badge">СКОРО ПОДВЕЗУТ</span>';
+          } else if (
+            item.new === true
+          ) {
+            badge =
+              '<span class="new-badge">NEW</span>';
+          }
+
+          const abv =
+            item.abv
+              ? (
+                  '<span class="beer-abv">' +
+                  escapeHtml(item.abv) +
+                  '%</span>'
+                )
+              : '';
+
+          return (
+            '<div class="beer-row">' +
+
+              '<div class="beer-name">' +
+                escapeHtml(item.name) +
+                badge +
+              '</div>' +
+
+              abv +
+
+              '<div class="beer-price">' +
+                escapeHtml(item.price) +
+                '<span class="ruble">₽</span>' +
+              '</div>' +
+
+            '</div>'
+          );
+        })
         .join('');
     }
 
@@ -534,9 +501,7 @@ app.get(
       'no-store, no-cache, must-revalidate, max-age=0'
     );
 
-    res.type(
-      'html'
-    );
+    res.type('html');
 
     return res.send(
 `<!DOCTYPE html>
@@ -566,7 +531,6 @@ app.get(
 
 html,
 body {
-
   margin: 0;
   padding: 0;
 
@@ -585,12 +549,7 @@ body {
     sans-serif;
 }
 
-/* ======================================
-   ФОН
-   ====================================== */
-
 .screen {
-
   position: relative;
 
   width: 100vw;
@@ -598,70 +557,48 @@ body {
 
   overflow: hidden;
 
-  background-color: #000;
-
-  background-image:
-    url('/8B5AE0DF-45B3-4244-A904-F2ABFA489704.png?v=20260924');
-
-  background-repeat:
+  background:
+    #000
+    url('/8B5AE0DF-45B3-4244-A904-F2ABFA489704.png?v=20261015')
+    center center /
+    100% 100%
     no-repeat;
-
-  background-position:
-    center center;
-
-  background-size:
-    100% 100%;
 }
-
-/* ======================================
-   ЗАТЕМНЕНИЕ ПОД АССОРТИМЕНТОМ
-   ====================================== */
 
 .menu-shade {
-
   position: absolute;
 
-  left: 0.8%;
-  right: 0.8%;
+  left: 0.4%;
+  right: 0.4%;
 
-  top: 12.2%;
+  top: 10.7%;
 
-  height: 68.5%;
+  height: 72.5%;
 
   background:
-    rgba(0,0,0,0.25);
+    rgba(0,0,0,0.29);
 
   border-radius:
-    18px;
+    16px;
 }
-
-/* ======================================
-   МЕНЮ
-   ====================================== */
 
 .menu {
-
   position: absolute;
 
-  left: 1.3%;
-  right: 1.3%;
+  left: 0.7%;
+  right: 0.7%;
 
-  top: 13%;
+  top: 11.4%;
 
-  height: 67%;
+  height: 71%;
 }
 
-/* ======================================
-   ДВЕ КОЛОНКИ
-   ====================================== */
-
 .column {
-
   position: absolute;
 
   top: 0;
 
-  width: 48.8%;
+  width: 49.1%;
   height: 100%;
 }
 
@@ -673,134 +610,118 @@ body {
   right: 0;
 }
 
-/* ======================================
-   ЦЕНТРАЛЬНАЯ ЛИНИЯ
-   ====================================== */
-
 .center-line {
-
   position: absolute;
 
   left: 50%;
 
-  top: 14%;
+  top: 12%;
 
-  height: 64%;
+  height: 69%;
 
   width: 3px;
 
   background:
-    rgba(
-      255,
-      198,
-      41,
-      0.85
-    );
+    rgba(255,198,41,0.92);
 
   transform:
     translateX(-50%);
 }
 
-/* ======================================
-   СТРОКА
-   ====================================== */
-
 .beer-row {
-
   position: relative;
 
   width: 100%;
 
-  height: 14.2857%;
+  height: 11.1111%;
 
   background:
-    rgba(0,0,0,0.30);
+    rgba(0,0,0,0.24);
 
   border-bottom:
-    2px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.17
-    );
+    1px solid
+    rgba(255,255,255,0.19);
 }
 
-/* ======================================
-   НАЗВАНИЕ — ЕЩЁ КРУПНЕЕ
-   ====================================== */
+.empty-row {
+  background:
+    rgba(0,0,0,0.12);
+}
 
 .beer-name {
-
   position: absolute;
 
-  left: 1.6%;
+  left: 1%;
 
   top: 50%;
 
   transform:
     translateY(-50%);
 
-  width: 72%;
+  width: 60%;
 
-  color:
-    #ffffff;
+  color: #fff;
 
-  font-size:
-    3.4vw;
+  font-size: 3.2vw;
 
-  font-weight:
-    900;
+  font-weight: 900;
 
-  line-height:
-    1;
+  line-height: 1;
 
-  white-space:
-    nowrap;
+  white-space: nowrap;
 
-  overflow:
-    hidden;
+  overflow: hidden;
 
-  text-overflow:
-    ellipsis;
+  text-overflow: ellipsis;
 
   text-shadow:
     0 4px 9px #000,
     0 0 4px #000;
 }
 
-/* ======================================
-   ЦЕНА — ЕЩЁ КРУПНЕЕ
-   ====================================== */
-
-.beer-price {
-
+.beer-abv {
   position: absolute;
 
-  right: 1%;
+  right: 23%;
 
   top: 50%;
 
   transform:
     translateY(-50%);
 
-  color:
-    #ffc629;
+  color: #eeeeee;
 
-  font-size:
-    4.2vw;
+  font-size: 1.85vw;
 
-  font-weight:
-    900;
+  font-weight: 900;
 
-  line-height:
-    1;
+  white-space: nowrap;
 
-  white-space:
-    nowrap;
+  text-shadow:
+    0 3px 7px #000;
+}
 
-  text-align:
-    right;
+.beer-price {
+  position: absolute;
+
+  right: 0.6%;
+
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+
+  color: #ffc629;
+
+  font-size: 3.8vw;
+
+  font-weight: 900;
+
+  line-height: 1;
+
+  white-space: nowrap;
+
+  text-align: right;
 
   text-shadow:
     0 4px 9px #000,
@@ -808,85 +729,40 @@ body {
 }
 
 .ruble {
+  margin-left: 3px;
 
-  margin-left:
-    5px;
+  font-size: 1.85vw;
 
-  font-size:
-    2.1vw;
-
-  font-weight:
-    900;
+  font-weight: 900;
 }
 
-/* ======================================
-   NEW
-   ====================================== */
+.new-badge,
+.soon-badge {
+  display: inline-block;
 
-.new-badge {
-
-  display:
-    inline-block;
-
-  margin-left:
-    8px;
+  margin-left: 6px;
 
   padding:
-    3px 7px;
+    2px 5px;
 
-  background:
-    #ffc629;
+  background: #ffc629;
 
-  color:
-    #000;
+  color: #000;
 
-  font-size:
-    0.75vw;
+  font-weight: 900;
 
-  font-weight:
-    900;
-
-  vertical-align:
-    middle;
+  vertical-align: middle;
 
   transform:
-    rotate(-4deg);
+    rotate(-3deg);
 }
 
-/* ======================================
-   ЕСЛИ МЕНЮ ПУСТО
-   ====================================== */
+.new-badge {
+  font-size: 0.62vw;
+}
 
-.empty {
-
-  position: absolute;
-
-  left: 28%;
-  right: 28%;
-
-  top: 38%;
-
-  padding:
-    24px;
-
-  background:
-    rgba(0,0,0,0.82);
-
-  border:
-    2px solid
-    #ffc629;
-
-  color:
-    #fff;
-
-  text-align:
-    center;
-
-  font-size:
-    2.8vw;
-
-  font-weight:
-    900;
+.soon-badge {
+  font-size: 0.50vw;
 }
 
 </style>
@@ -897,33 +773,21 @@ body {
 
 <div class="screen">
 
-  ${
-    items.length > 0
-      ? `
-        <div class="menu-shade">
-        </div>
+  <div class="menu-shade"></div>
 
-        <div class="center-line">
-        </div>
+  <div class="center-line"></div>
 
-        <div class="menu">
+  <div class="menu">
 
-          <div class="column column-left">
-            ${makeRows(left)}
-          </div>
+    <div class="column column-left">
+      ${makeRows(left)}
+    </div>
 
-          <div class="column column-right">
-            ${makeRows(right)}
-          </div>
+    <div class="column column-right">
+      ${makeRows(right)}
+    </div>
 
-        </div>
-      `
-      : `
-        <div class="empty">
-          Меню обновляется
-        </div>
-      `
-  }
+  </div>
 
 </div>
 
@@ -934,33 +798,30 @@ body {
   }
 );
 
-// =====================================================
-// ГЛАВНАЯ
-// =====================================================
+/* =========================
+   ГЛАВНАЯ
+   ========================= */
 
 app.get(
   '/',
   function (req, res) {
-
     return res.sendFile(
       path.join(
-        __dirname,
-        'public',
+        PUBLIC_DIR,
         'index.html'
       )
     );
   }
 );
 
-// =====================================================
-// ЗАПУСК
-// =====================================================
+/* =========================
+   ЗАПУСК
+   ========================= */
 
 app.listen(
   PORT,
   '0.0.0.0',
   function () {
-
     console.log(
       'ЦУП Live Menu запущен на порту ' +
       PORT
